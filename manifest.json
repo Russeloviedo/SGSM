@@ -1,0 +1,20 @@
+{
+    "name": "SGSM",
+    "short_name": "SGSM",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#0f172a",
+    "icons": [
+        {
+            "src": "assets/branding/logo-nuevo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "assets/branding/logo-nuevo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -1,0 +1,2977 @@
+﻿<!DOCTYPE html>
+
+<html lang="es">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SGSM</title>
+
+    <!-- Fuente Inter para look corporativo -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+
+    <!-- Favicon e Iconos de App -->
+
+    <link rel="icon" type="image/png" href="/assets/branding/logo-nuevo.png">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-nuevo.png">
+
+    <!-- Dynamic Daily Background Script -->
+    <!-- Dynamic Background Script (Rotates every 5 mins) -->
+    <script>
+        (function () {
+            const TOTAL_IMAGES = 31;
+            const INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+            function updateBackground() {
+                const index = (Math.floor(Date.now() / INTERVAL_MS) % TOTAL_IMAGES) + 1;
+                const nextImageUrl = `url('/assets/backgrounds/${index}.png')`;
+
+                // Identify layers
+                const layer1 = document.getElementById('bg-layer-1');
+                const layer2 = document.getElementById('bg-layer-2');
+
+                // Determine active/inactive
+                const activeLayer = layer1.classList.contains('active') ? layer1 : layer2;
+                const inactiveLayer = layer1.classList.contains('active') ? layer2 : layer1;
+
+                // Only update if image is different (prevents flickering on same-interval checks)
+                if (inactiveLayer.style.backgroundImage !== nextImageUrl && activeLayer.style.backgroundImage !== nextImageUrl) {
+                    // 1. Prepare hidden layer
+                    inactiveLayer.style.backgroundImage = nextImageUrl;
+
+                    // 2. Cross-fade (Swap classes)
+                    // Small delay to ensure image load start? Browser handles this well usually.
+                    requestAnimationFrame(() => {
+                        activeLayer.classList.remove('active');
+                        inactiveLayer.classList.add('active');
+                    });
+                } else if (!activeLayer.style.backgroundImage) {
+                    // Initial Load
+                    activeLayer.style.backgroundImage = nextImageUrl;
+                }
+            }
+
+            // Run immediately after DOM load to ensure elements exist
+            window.addEventListener('DOMContentLoaded', () => {
+                updateBackground();
+                setInterval(updateBackground, 60000); // Check every minute
+            });
+        })();
+    </script>
+
+    <link rel="manifest" href="/manifest.json">
+
+
+
+    <!-- Incluimos los estilos CSS (Link estándar para ver en local) -->
+
+    <link rel="stylesheet" href="/src/client/index.css?v=3.0">
+
+
+
+    <!-- Para Google Apps Script (Despliegue final), usaríamos: -->
+
+    <!-- <?!= include('index.css'); ?> -->
+
+
+
+    <!-- Firebase SDKs REMOVED -->
+
+    <!-- Custom Login System Active -->
+
+    <!-- ApexCharts for Dashboard Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Lucide Icons for a modern look -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+
+
+
+<body>
+    <!-- GLOBAL BACKGROUND LAYER -->
+    <!-- GLOBAL BACKGROUND LAYER -->
+    <div id="global-bg-container">
+        <div id="bg-layer-1" class="bg-layer active"></div>
+        <div id="bg-layer-2" class="bg-layer"></div>
+        <div id="bg-overlay"></div>
+    </div>
+    <!-- AMBIENT PARTICLES CONTAINER -->
+    <div id="ambient-particles"></div>
+
+
+
+    <div class="container">
+
+        <!-- LOGIN OVERLAY -->
+
+        <!-- DASHBOARD LOADING OVERLAY (New Liquid Loader) -->
+        <div id="dashboardLoaderOverlay"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9998; display: none; flex-direction: column; justify-content: center; align-items: center; color: white;">
+            <div class="liquid-loader">
+                <div class="loading-text">
+                    Cargando<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+                </div>
+                <div class="loader-track">
+                    <div class="liquid-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGIN OVERLAY (Custom) -->
+
+        <div id="loginOverlay"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;">
+
+            <div
+                style="background: white; padding: 1.5rem; border-radius: 12px; text-align: center; max-width: 400px; width: 90%; color: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+
+                <img src="/assets/branding/EHS.png" alt="Hunter" style="height: 50px; margin-bottom: 0.5rem;">
+
+                <h2 style="margin-top: 0; font-family: 'Inter', sans-serif; font-size: 1.25rem;">Acceso
+                    Restringido</h2>
+
+                <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.9rem;">Sistema de Gestión y Seguimiento de
+                    Servicio Médico EHS</p>
+
+
+
+                <form id="customLoginForm" style="text-align: left; margin-top: 1rem;">
+
+                    <div style="margin-bottom: 0.75rem;">
+
+                        <label
+                            style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.25rem;">Usuario</label>
+
+                        <input type="text" id="loginUser" placeholder="Usuario" required
+                            style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem;">
+
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+
+                        <label
+                            style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.25rem;">Contraseña</label>
+
+                        <div class="password-input-wrapper">
+                            <input type="password" id="loginPass" placeholder="••••••" required
+                                style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem;">
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordVisibility('loginPass', this)" title="Ver contraseña">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" id="loginSubmitBtn"
+                        style="background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 0.95rem; font-weight: 500; cursor: pointer; width: 100%; transition: opacity 0.2s;">
+
+                        Ingresar Sistema
+
+                    </button>
+
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="#" onclick="openResetPasswordModal(event)"
+                            style="color: #64748b; font-size: 0.85rem; text-decoration: none;">¿Olvidaste tu
+                            contraseña?</a>
+                    </div>
+
+                </form>
+
+
+
+                <p id="loginError"
+                    style="color: #ef4444; font-size: 0.85rem; margin-top: 0.75rem; display: none; background: #fee2e2; padding: 6px; border-radius: 4px; border: 1px solid #fecaca;">
+
+                </p>
+
+                <div style="margin-top: 1rem; text-align: center;">
+
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Sistema Seguro v3.0</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RESET PASSWORD MODAL -->
+        <div id="resetPasswordModal" class="modal-overlay" style="display:none; z-index: 20000;"
+            onclick="if(event.target === this) closeResetPasswordModal()">
+            <div class="modal-content" style="max-width: 400px; position:relative; z-index: 20001;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Restablecer Contraseña</h3>
+                    <button onclick="closeResetPasswordModal()" class="close-modal-btn">&times;</button>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">Ingresa tu usuario o correo
+                        electrónico. Te enviaremos una contraseña temporal.</p>
+                    <input type="text" id="resetInput" placeholder="Usuario o Email" class="form-control"
+                        style="width: 100%; margin-bottom: 15px;">
+                    <button id="btnResetSend" onclick="handleResetPassword()" class="btn-primary"
+                        style="width: 100%;">Enviar Correo</button>
+                    <p id="resetMsg" style="margin-top: 10px; font-size: 0.85rem; text-align: center;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHANGE PASSWORD MODAL -->
+        <div id="changePasswordModal" class="modal-overlay" style="display:none; z-index: 10000;">
+            <div class="modal-content" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Cambiar Contraseña</h3>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #b91c1c;">Por seguridad, debes cambiar tu
+                        contraseña temporal.</p>
+                    <div class="password-input-wrapper" style="margin-bottom: 10px;">
+                        <input type="password" id="chgOldPass" placeholder="Contraseña Actual" class="form-control"
+                            style="width: 100%;">
+                        <button type="button" class="password-toggle-btn"
+                            onclick="togglePasswordVisibility('chgOldPass', this)" title="Ver contraseña">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="password-input-wrapper" style="margin-bottom: 10px;">
+                        <input type="password" id="chgNewPass1" placeholder="Nueva Contraseña" class="form-control"
+                            style="width: 100%;">
+                        <button type="button" class="password-toggle-btn"
+                            onclick="togglePasswordVisibility('chgNewPass1', this)" title="Ver contraseña">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="password-input-wrapper" style="margin-bottom: 15px;">
+                        <input type="password" id="chgNewPass2" placeholder="Confirmar Nueva Contraseña"
+                            class="form-control" style="width: 100%;">
+                        <button type="button" class="password-toggle-btn"
+                            onclick="togglePasswordVisibility('chgNewPass2', this)" title="Ver contraseña">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="btnChangePass" onclick="handleChangePassword()" class="btn-primary"
+                        style="width: 100%;">Actualizar Contraseña</button>
+                    <p id="chgMsg" style="margin-top: 10px; font-size: 0.85rem; text-align: center; color: #ef4444;">
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <header>
+
+            <div class="logo-container">
+
+                <img src="/assets/branding/EHS.png" alt="EHS Logo" class="logo-img">
+
+            </div>
+
+            <h1>Sistema de Gestión y Seguimiento de Servicio Médico EHS</h1>
+
+            <p>Servicio Medico & Nutrición <span id="headerRecordCount"
+                    style="margin-left: 10px; font-size: 0.8rem; background: rgba(59, 130, 246, 0.2); padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.3); vertical-align: middle; display: none;">Total:
+                    <span id="recordCountValue">...</span></span></p>
+
+            <!-- Indicador de pasos opcional -->
+
+            <div class="progress-bar">
+
+                <div class="progress-step active" data-step="0">0</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="1">1</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="2">2</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="3">3</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="4">4</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="5">5</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="6">6</div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step" data-step="7">7</div>
+
+            </div>
+
+        </header>
+
+
+
+        <div id="message"></div>
+
+
+
+        <form id="nutritionForm" novalidate>
+
+
+
+            <!-- PASO 0: Búsqueda / Inicio -->
+
+            <div class="form-step active" id="step0">
+
+                <div class="section-title">
+                    Identificación
+                </div>
+
+                <div class="form-group" style="max-width: 400px; margin: 0 auto; text-align: center;">
+
+                    <label for="searchId" style="font-size: 1.2rem; margin-bottom: 1rem; display: block;">Número de
+
+                        Empleado</label>
+
+                    <input type="text" id="searchId" placeholder="Ingresa tu número"
+                        style="font-size: 1.5rem; text-align: center;" inputmode="numeric"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+                    <button type="button" class="btn-next" style="width: 100%; margin-top: 1.5rem;"
+                        onclick="searchEmployee()">Buscar / Iniciar &rarr;</button>
+
+                    <!-- Draft Persistence Container -->
+                    <div id="draftContainer"></div>
+
+
+
+                    <a href="#" onclick="openRegistrosProtected(event)"
+                        style="display: block; margin-top: 1rem; color: var(--accent-color); text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                        Registros
+                    </a>
+
+                    <a href="#" onclick="openDashboard(event)"
+                        style="display: block; margin-top: 0.75rem; color: #3b82f6; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                        Gráficas
+                    </a>
+
+                    <!-- Old toggle button removed from here -->
+
+
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem; opacity: 0.8;">
+                    <a href="#" onclick="logout()"
+                        style="font-size: 0.75rem; color: #64748b; text-decoration: none; border-bottom: 1px dotted #cbd5e1;">Cerrar
+                        Sesión</a>
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 0.5: Historial / Perfil de Empleado -->
+
+            <div class="form-step" id="stepHistory">
+
+                <!-- Se rellena dinámicamente con renderHistory() -->
+
+                <div id="dashboardContent"></div>
+
+
+
+                <div class="button-container center" style="margin-top: 2rem;">
+
+                    <button type="button" class="btn-prev" onclick="showStep(0)">&larr; Volver al Inicio</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 1: Selección de Programa (Nuevo Paso Independiente) -->
+
+            <div class="form-step" id="step1">
+
+                <div class="section-title">Selección de Programa</div>
+
+                <div class="form-group full-width" style="max-width: 600px; margin: 0 auto;">
+
+                    <label for="programaSelect">Proceso a realizar:</label>
+
+                    <select id="programaSelect" onchange="addPrograma()">
+
+                        <option value="" disabled selected>Seleccione programa...</option>
+
+                        <option value="Cronico Degenerativos">Cronico Degenerativos</option>
+
+                        <option value="Salud Ocupacional">Salud Ocupacional</option>
+
+                        <option value="Actividades restringidas">Actividades restringidas</option>
+
+                        <option value="Brigadistas">Brigadistas</option>
+
+                        <option value="Nuevo ingreso">Nuevo ingreso</option>
+
+                    </select>
+
+                    <!-- Contenedor de Tags Programas -->
+
+                    <div id="programasTags" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+
+                    </div>
+
+                    <input type="hidden" id="programasList" name="programasList">
+
+                </div>
+
+                <div class="button-container space-between">
+
+                    <button type="button" class="btn-prev" onclick="goBackFromStep1()">&larr; Inicio</button>
+
+                    <button type="button" class="btn-next" onclick="nextStep()">Continuar &rarr;</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 2: Datos Personales (Antes Paso 1) -->
+
+            <div class="form-step" id="step2">
+
+                <div class="section-title">Datos Personales</div>
+
+                <div class="grid-2">
+
+                    <div class="form-group">
+
+                        <label for="num">Núm. Empleado</label>
+
+                        <input type="text" id="num" name="num" placeholder="Ej: 12345" required readonly
+                            style="background-color: #f1f5f9;">
+
+                    </div>
+
+                    <!-- (Programas movidos arriba) -->
+
+
+
+                    <div class="form-group">
+
+                        <label for="nombre">Nombre Completo</label>
+
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre Apellido" required>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="grid-2">
+
+                    <div class="form-group">
+
+                        <label for="genero">Género</label>
+
+                        <select id="genero" name="genero" onchange="toggleGinecoFields()" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Masculino">Masculino</option>
+
+                            <option value="Femenino">Femenino</option>
+
+                            <option value="Otro">Otro</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="edad">Edad</label>
+
+                        <input type="number" id="edad" name="edad" placeholder="Años" min="18" max="100" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="contacto">Contacto</label>
+
+                        <input type="tel" id="contacto" name="contacto" placeholder="Teléfono o Email" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="lugarNacimiento">Lugar de Nacimiento</label>
+
+                        <input type="text" id="lugarNacimiento" name="lugarNacimiento" placeholder="Ciudad, Estado"
+                            required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="estadoCivilSelect">Estado Civil</label>
+
+                        <select id="estadoCivilSelect" onchange="checkEstadoCivilManual(this)" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Soltero">Soltero (a)</option>
+
+                            <option value="Casado">Casado (a)</option>
+
+                            <option value="Union Libre">Union Libre</option>
+
+                            <option value="Divorciado">Divorciado (a)</option>
+
+                            <option value="Viudo">Viudo (a)</option>
+
+                            <option value="Otro">Otro (Especificar)</option>
+
+                        </select>
+
+                        <input type="text" id="estadoCivil" name="estadoCivil" placeholder="Especifique estado civil"
+                            style="display: none; margin-top: 0.5rem;">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="escolaridad">Escolaridad</label>
+
+                        <select id="escolaridad" name="escolaridad" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Primaria">Primaria</option>
+
+                            <option value="Secundaria">Secundaria</option>
+
+                            <option value="Preparatoria">Preparatoria</option>
+
+                            <option value="Tecnica">Técnica</option>
+
+                            <option value="Universidad">Universidad</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <!-- LEGAL COMPLIANCE CHECK FOR NURSE/OPERATOR -->
+                <div class="form-group"
+                    style="margin-top: 1rem; padding: 1rem; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                    <label
+                        style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: 500; color: #166534;">
+                        <input type="checkbox" id="avisoPrivacidadCheck" required
+                            style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;">
+                        <span>
+                            <strong>Declaración del Operador:</strong> Confirmo que el paciente ha leído y firmado
+                            físicamente el
+                            <a href="#" onclick="event.preventDefault(); openAvisoModal();"
+                                style="color: #166534; text-decoration: underline; font-weight: bold;">Aviso de
+                                Privacidad</a>, y ha otorgado su consentimiento expreso para la recolección de
+                            sus datos sensibles de salud.
+                        </span>
+                    </label>
+                </div>
+
+
+
+                <div class="button-container space-between">
+
+                    <button type="button" class="btn-prev" onclick="prevStep()">&larr; Atrás</button>
+
+                    <!-- Navega al Paso 3 -->
+
+                    <button type="button" class="btn-next" onclick="nextStep()">Siguiente &rarr;</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 3: Información Laboral (Antes Paso 2) -->
+
+            <div class="form-step" id="step3">
+
+                <div class="section-title">Información Laboral</div>
+
+                <div class="grid-2">
+
+                    <div class="form-group">
+
+                        <label for="supervisorSelect">Supervisor</label>
+                        <select id="supervisorSelect" onchange="checkSupervisorManual(this)" required>
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option value="Personalizar">Personalizar</option>
+                        </select>
+                        <input type="text" id="supervisor" name="supervisor" placeholder="Nombre del Supervisor"
+                            style="display: none; margin-top: 0.5rem;" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="planta">Planta</label>
+
+                        <select id="planta" name="planta" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Planta 1">Planta 1</option>
+
+                            <option value="Planta 2">Planta 2</option>
+
+                            <option value="Planta 3">Planta 3</option>
+
+                            <option value="Planta 4">Planta 4</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="areaSelect">Area</label>
+
+                        <select id="areaSelect" onchange="checkAreaManual(this)" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Manual">Ingresar área (Manual)</option>
+
+                            <!-- Se llena por JS -->
+
+                        </select>
+
+                        <input type="text" id="area" name="area" placeholder="Especifique el área"
+                            style="display: none; margin-top: 0.5rem;" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="puestoSelect">Puesto</label>
+
+                        <select id="puestoSelect" onchange="checkPuestoManual(this)" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Manual">Ingresar puesto (Manual)</option>
+
+                            <!-- Se llena por JS -->
+
+                        </select>
+
+                        <input type="text" id="puesto" name="puesto" placeholder="Especifique el puesto"
+                            style="display: none; margin-top: 0.5rem;" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="fechaIngresoPuesto">Fecha de ingreso a puesto</label>
+
+                        <input type="date" id="fechaIngresoPuesto" name="fechaIngresoPuesto"
+                            onchange="updateFechaEmpresaFromPuesto()" required>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaIngresoEmpresa">Fecha de ingreso a la empresa</label>
+                        <input type="date" id="fechaIngresoEmpresa" name="fechaIngresoEmpresa"
+                            onchange="calcularAntiguedadEmpresa()" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="antiguedadPuesto">Antigüedad de puesto</label>
+                        <input type="text" id="antiguedadPuesto" name="antiguedadPuesto"
+                            placeholder="Calculado automáticamente..." readonly style="background-color: #f1f5f9;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="antiguedadEmpresa">Antigüedad en la empresa</label>
+                        <input type="text" id="antiguedadEmpresa" name="antiguedadEmpresa"
+                            placeholder="Calculado automáticamente..." readonly style="background-color: #f1f5f9;">
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="turnoSelect">Turno</label>
+
+                        <select id="turnoSelect" onchange="checkTurnoManual(this)" required>
+
+                            <option value="" disabled selected>Seleccione...</option>
+
+                            <option value="Manual">Ingresar turno (Manual)</option>
+
+                            <option value="A">A</option>
+
+                            <option value="A001">A001</option>
+
+                            <option value="A002">A002</option>
+
+                            <option value="AD01">AD01</option>
+
+                            <option value="AD02">AD02</option>
+
+                            <option value="AD03">AD03</option>
+
+                            <option value="AD10">AD10</option>
+
+                            <option value="AM01">AM01</option>
+
+                            <option value="AM01A">AM01A</option>
+
+                            <option value="AM01B">AM01B</option>
+
+                            <option value="AM01C">AM01C</option>
+
+                            <option value="B">B</option>
+
+                            <option value="C">C</option>
+
+                            <option value="D">D</option>
+
+                            <option value="F">F</option>
+
+                            <option value="JR">JR</option>
+
+                            <option value="L">L</option>
+
+                            <option value="LS01">LS01</option>
+
+                            <option value="LS02">LS02</option>
+
+                            <option value="LS03">LS03</option>
+
+                            <option value="M010">M010</option>
+
+                            <option value="M011">M011</option>
+
+                            <option value="PP">PP</option>
+
+                            <option value="PP3">PP3</option>
+
+                            <option value="RH2">RH2</option>
+
+                            <option value="RH3">RH3</option>
+
+                        </select>
+
+                        <input type="text" id="turno" name="turno" placeholder="Especifique el turno"
+                            style="display: none; margin-top: 0.5rem;" required>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unidadNegocio">Unidad de Negocio</label>
+                        <select id="unidadNegocio" name="unidadNegocio" required>
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option value="FX">FX</option>
+                            <option value="Irrigacion">Irrigacion</option>
+                            <option value="HCM">HCM</option>
+                            <option value="DD">DD</option>
+                            <option value="Soporte">Soporte</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+
+                        <label for="funcionesPuesto">Funciones principales de Puesto</label>
+
+                        <textarea id="funcionesPuesto" name="funcionesPuesto" rows="2"
+                            placeholder="Describa las funciones principales..."></textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="button-container space-between">
+
+                    <button type="button" class="btn-prev" onclick="prevStep()">&larr; Atrás</button>
+
+                    <button type="button" class="btn-next" onclick="nextStep()">Siguiente &rarr;</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 4: Evaluación Médica y Nutricional (Antes Paso 3) -->
+
+            <div class="form-step" id="step4">
+
+                <div class="section-title">Evaluación Médica y Nutricional</div>
+
+
+
+                <!-- Sección de Padecimientos movida aquí -->
+
+                <div class="form-group full-width" style="margin-bottom: 1.5rem;">
+
+                    <label for="padecimientoSelect">Padecimiento / Condición</label>
+
+                    <select id="padecimientoSelect" onchange="checkPadecimientoOtros(this)">
+
+                        <option value="" selected>Ninguno / Sano</option>
+
+                        <option value="Diabetes Mellitus I">Diabetes Mellitus I</option>
+
+                        <option value="Diabetes Mellitus II">Diabetes Mellitus II</option>
+
+                        <option value="Hipertension">Hipertension</option>
+
+                        <option value="Asma">Asma</option>
+
+                        <option value="IMC">IMC (Obesidad/Sobrepeso)</option>
+
+                        <option value="Hipertension + Diabetes Mellitus I">Hipertension + Diabetes Mellitus I
+
+                        </option>
+
+                        <option value="Hipertension + Diabetes Mellitus II">Hipertension + Diabetes Mellitus II
+
+                        </option>
+
+                        <option value="IMC + Hipertension">IMC + Hipertension</option>
+
+                        <option value="IMC + Diabetes Meliitus I">IMC + Diabetes Meliitus I</option>
+
+                        <option value="IMC + Diabetes Mellitus II">IMC + Diabetes Mellitus II</option>
+
+                        <option value="Otros">Otros (Especificar)</option>
+
+                    </select>
+
+                    <!-- Input oculto para "Otros" o para guardar el valor final -->
+
+                    <input type="text" id="padecimiento" name="padecimiento" placeholder="Especifique el padecimiento"
+                        style="display: none; margin-top: 0.5rem;">
+
+
+                </div>
+
+                <div class="form-group full-width" style="margin-top: 1rem;">
+                    <label for="antecedentes">Antecedentes</label>
+                    <textarea id="antecedentes" name="antecedentes" rows="3" placeholder="Especifique antecedentes..."
+                        style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+                </div>
+
+
+
+                <div class="grid-3">
+
+                    <div class="form-group">
+
+                        <label for="peso">Peso (kg)</label>
+
+                        <input type="number" step="0.1" id="peso" name="peso" oninput="calcularIMC()" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="talla">Talla (cm)</label>
+
+                        <input type="number" step="1" id="talla" name="talla" placeholder="Ej: 175"
+                            oninput="calcularIMC()" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="taSistolica">TA Sistólica</label>
+
+                        <input type="number" id="taSistolica" name="taSistolica" placeholder="Ej: 120" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="taDiastolica">TA Diastólica</label>
+
+                        <input type="number" id="taDiastolica" name="taDiastolica" placeholder="Ej: 80" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="imc">IMC</label>
+
+                        <input type="number" step="0.1" id="imc" name="imc" readonly style="background-color: #f1f5f9;"
+                            required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="pulso">Pulso (bpm)</label>
+
+                        <input type="number" id="pulso" name="pulso" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="oximetria">Oximetría (%)</label>
+
+                        <input type="number" id="oximetria" name="oximetria" placeholder="Ej: 98" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="glucometria">Glucometría (mg/dL)</label>
+
+                        <input type="number" id="glucometria" name="glucometria" placeholder="Ej: 90" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="temperatura">Temperatura (°C)</label>
+
+                        <input type="number" step="0.1" id="temperatura" name="temperatura" placeholder="Ej: 36.5">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="fat">% FAT</label>
+
+                        <input type="number" step="0.1" id="fat" name="fat">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="musc">% MUSC</label>
+
+                        <input type="number" step="0.1" id="musc" name="musc">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="rmi">RMI (Kcal)</label>
+
+                        <input type="number" id="rmi" name="rmi">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="bodyage">Body Age</label>
+
+                        <input type="number" id="bodyage" name="bodyage">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="visc">Grasa Visceral</label>
+
+                        <input type="number" step="0.5" id="visc" name="visc">
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="agudezaVisual">Agudeza Visual</label>
+                        <input type="text" id="agudezaVisual" name="agudezaVisual" placeholder="Ej: 20/20">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="agudezaAuditiva">Agudeza Auditiva</label>
+                        <input type="text" id="agudezaAuditiva" name="agudezaAuditiva" placeholder="Normal / Hallazgos">
+                    </div>
+
+                </div>
+
+                <!-- ============================================== -->
+                <!-- SECCION REUBICADA: Antecedentes Ginecológicos (Final de Paso 4) -->
+                <!-- ============================================== -->
+                <div id="antecedentesGinecoContainer" class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem; display: none;">
+                    <label>Antecedentes Ginecológicos <span
+                            style="font-size: 0.9rem; font-weight: normal; color: #64748b;">(Solo
+                            Femenino)</span></label>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="gineco_menarca">Menarca (Edad)</label>
+                            <input type="number" id="gineco_menarca" name="gineco_menarca">
+                        </div>
+                        <div class="form-group">
+                            <label for="gineco_fum">FUM (Fecha Última Menstruación)</label>
+                            <input type="date" id="gineco_fum" name="gineco_fum">
+                        </div>
+                        <div class="form-group">
+                            <label for="gineco_planificacion">Método Planificación</label>
+                            <select id="gineco_planificacion" name="gineco_planificacion">
+                                <option value="" disabled selected>Seleccione...</option>
+                                <option value="Ninguno">Ninguno</option>
+                                <option value="OTB (Salgingo)">OTB (Salpingoclasia)</option>
+                                <option value="DIU (Mirena/Cobre)">DIU (Mirena/Cobre)</option>
+                                <option value="Implante Subdermico">Implante Subdérmico</option>
+                                <option value="Hormonal Oral (Pastillas)">Hormonales Orales (Pastillas)</option>
+                                <option value="Hormonal Inyectable">Hormonal Inyectable (Mensual/Bimestral)</option>
+                                <option value="Parche Transdermico">Parche Transdérmico</option>
+                                <option value="Preservativo">Preservativo (Barrera)</option>
+                                <option value="Ritmo / Calendario">Ritmo / Calendario</option>
+                                <option value="Vasectomia (Pareja)">Vasectomía (Pareja)</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="gineco_gestas">Gestas</label>
+                            <input type="number" id="gineco_gestas" name="gineco_gestas">
+                        </div>
+                        <div class="form-group">
+                            <label for="gineco_partos">Partos</label>
+                            <input type="number" id="gineco_partos" name="gineco_partos">
+                        </div>
+                        <div class="form-group">
+                            <label for="gineco_cesareas">Cesáreas</label>
+                            <input type="number" id="gineco_cesareas" name="gineco_cesareas">
+                        </div>
+                        <div class="form-group">
+                            <label for="gineco_abortos">Abortos</label>
+                            <input type="number" id="gineco_abortos" name="gineco_abortos">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="gineco_papanicolau">Fecha Último Papanicolau</label>
+                            <input type="date" id="gineco_papanicolau" name="gineco_papanicolau">
+                        </div>
+                        <div class="form-group">
+                            <label for="gineco_mastografia">Fecha Última Mastografía</label>
+                            <input type="date" id="gineco_mastografia" name="gineco_mastografia">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container space-between">
+
+                    <button type="button" class="btn-prev" onclick="prevStep()">&larr; Atrás</button>
+
+                    <button type="button" class="btn-next" onclick="nextStep()">Siguiente &rarr;</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 5: Historia Ocupacional - Antecedentes Patologicos personales (Antes Paso 4) -->
+
+            <div class="form-step" id="step5">
+
+                <div class="section-title">Historia Ocupacional - Antecedentes Patologicos personales</div>
+
+
+
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+
+                    <label>Hábitos Nocivos</label>
+                    <div class="risk-grid">
+                        <label class="risk-card">
+                            <input type="checkbox" name="habitosCheck" value="Alcohol" onchange="toggleHabito(this)">
+                            <span>Alcohol</span>
+                        </label>
+
+                        <label class="risk-card">
+                            <input type="checkbox" name="habitosCheck" value="Tabaco" onchange="toggleHabito(this)">
+                            <span>Tabaco</span>
+                        </label>
+
+                        <label class="risk-card">
+                            <input type="checkbox" name="habitosCheck" value="Drogas" onchange="toggleHabito(this)">
+                            <span>Drogas</span>
+                        </label>
+
+                        <label class="risk-card">
+                            <input type="checkbox" name="habitosCheck" value="Medicamentos"
+                                onchange="toggleHabito(this)">
+                            <span>Medicamentos</span>
+                        </label>
+                    </div>
+
+
+
+                    <!-- Detalles Dinámicos -->
+
+
+
+                    <div id="habitosDetailsContainer"></div>
+
+                </div>
+
+                <!-- SECCIÓN: Antecedentes Heredofamiliares (AHF) -->
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                    <label>Antecedentes Heredofamiliares (AHF)</label>
+                    <div class="risk-grid">
+                        <label class="risk-card">
+                            <input type="checkbox" name="ahf_diabetes" value="Diabetes" onchange="toggleAHF(this)">
+                            <span>Diabetes</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="ahf_hipertension" value="Hipertension"
+                                onchange="toggleAHF(this)">
+                            <span>Hipertensión</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="ahf_cancer" value="Cancer" onchange="toggleAHF(this)">
+                            <span>Cáncer</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="ahf_cardiopatias" value="Cardiopatias"
+                                onchange="toggleAHF(this)">
+                            <span>Cardiopatías</span>
+                        </label>
+                    </div>
+                    <!-- Contenedor para detalles dinámicos de AHF -->
+                    <div id="ahfDetailsContainer" style="margin-top: 0.5rem;"></div>
+                    <input type="text" id="ahf_otros" name="ahf_otros" placeholder="Otros antecedentes familiares..."
+                        style="margin-top: 0.5rem; width: 100%;">
+                </div>
+
+                <!-- SECCIÓN: Vacunas y Alergias -->
+                <div class="grid-2" style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                    <div class="form-group">
+                        <label>Esquema de Vacunación</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" name="vacuna_tetanos" value="Si"> Tétanos
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" name="vacuna_influenza" value="Si"> Influenza
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <input type="checkbox" name="vacuna_hepatitis" value="Si"> Hepatitis
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="alergia_medicamentos" style="color: #ef4444; font-weight: bold;">⚠️ Alergias a
+                            Medicamentos</label>
+                        <input type="text" id="alergia_medicamentos" name="alergia_medicamentos" placeholder="NINGUNA"
+                            style="border: 2px solid #fecaca; background-color: #fff1f2;">
+                    </div>
+                </div>
+
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+
+                    <label>Patologías / Antecedentes</label>
+
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+
+                        <select id="patologiasSelect" onchange="addPatologia()" style="flex-grow: 1;">
+
+                            <option value="" disabled selected>Agregar patología...</option>
+
+                            <option value="Alergias">Alergias</option>
+
+                            <option value="Asma">Asma</option>
+
+                            <option value="Bronquitis">Bronquitis</option>
+
+                            <option value="Quemaduras">Quemaduras</option>
+
+                            <option value="Cirugias">Cirugias</option>
+
+                            <option value="Diabetes Mellitus I">Diabetes Mellitus I</option>
+
+                            <option value="Diabetes Mellitus II">Diabetes Mellitus II</option>
+
+                            <option value="Hipertension">Hipertension</option>
+
+                            <option value="Neoplasias">Neoplasias</option>
+
+                            <option value="Convulsiones">Convulsiones</option>
+
+                            <option value="TB">TB</option>
+
+                            <option value="ITS">ITS</option>
+
+                            <option value="Covid - 19">Covid - 19</option>
+
+                            <option value="Intoxicaciones">Intoxicaciones</option>
+
+                            <option value="Hepatitis">Hepatitis</option>
+
+                            <option value="Tifoidea">Tifoidea</option>
+
+                            <option value="Otros">Otros (Especificar)</option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- Contenedor de Tags -->
+
+                    <div id="patologiasTags"
+                        style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+
+                    </div>
+
+                    <!-- Input oculto para guardar la lista final -->
+
+                    <input type="hidden" id="patologiasLista" name="patologiasLista">
+
+
+
+                    <input type="text" id="patologiasOtros" name="patologiasOtros"
+                        placeholder="Especifique otras patologías..." style="display: none; margin-top: 0.5rem;">
+
+                </div>
+
+
+
+                <!-- SECCIÃ“N NUEVA: Riesgos Laborales (Tabs) -->
+
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+
+                    <label style="margin-bottom: 0.5rem; display: block;">Estudios de Gabinete / Riesgos
+                        Laborales</label>
+
+
+
+                    <div class="tab-container">
+                        <div class="tab-link active" onclick="openTab(event, 'tabQuimicos')">Químicos</div>
+                        <div class="tab-link" onclick="openTab(event, 'tabFisicos')">Físicos</div>
+                        <div class="tab-link" onclick="openTab(event, 'tabErgonomicos')">Ergonómicos</div>
+                        <div class="tab-link" onclick="openTab(event, 'tabMetabolicos')">Metabólicos</div>
+                        <div class="tab-link" onclick="openTab(event, 'tabBiologicos')">Biológicos</div>
+                    </div>
+
+
+
+
+
+                    <!-- Contenido Tab Químicos -->
+
+                    <div id="tabQuimicos" class="tab-content" style="display: block;">
+                        <div class="risk-grid">
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosQuimicos" value="QUIMICOS (SMAC 30, BH EGO)">
+                                <span>QUIMICOS (SMAC 30, BH EGO)</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosQuimicos" value="PLOMO EN SANGRE">
+                                <span>PLOMO EN SANGRE</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosQuimicos" value="BH">
+                                <span>BH</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosQuimicos" value="ESPIROMETRIA">
+                                <span>ESPIROMETRIA</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosQuimicos" value="AUDIOMETRIA">
+                                <span>AUDIOMETRIA</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosQuimicos" value="RAYOS X">
+                                <span>RAYOS X</span>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Contenido Tab Físicos -->
+
+                    <!-- Contenido Tab Físicos -->
+                    <div id="tabFisicos" class="tab-content" style="display: none;">
+                        <div class="risk-grid">
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosFisicos" value="TERMICOS">
+                                <span>TERMICOS</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosFisicos" value="AUDIOMETRIA">
+                                <span>AUDIOMETRIA</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosFisicos" value="ESPIROMETRIA">
+                                <span>ESPIROMETRIA</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosFisicos" value="OPTOMETRIA">
+                                <span>OPTOMETRIA</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosFisicos" value="RADIACION">
+                                <span>RADIACION</span>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Contenido Tab Ergonómicos -->
+                    <div id="tabErgonomicos" class="tab-content" style="display: none;">
+                        <div class="risk-grid">
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosErgonomicos"
+                                    value="RX TORAX Y COLUMNA LUMBAR AP Y LATERAL">
+                                <span>RX TORAX Y COLUMNA LUMBAR AP Y LATERAL</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosErgonomicos" value="SOBRE ESFUERZO MUSCULAR">
+                                <span>SOBRE ESFUERZO MUSCULAR</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosErgonomicos" value="MOVIMIENTOS REPETITIVOS">
+                                <span>MOVIMIENTOS REPETITIVOS</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosErgonomicos" value="POSTURA FORZADA">
+                                <span>POSTURA FORZADA</span>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Contenido Tab Metabólicos -->
+
+                    <div id="tabMetabolicos" class="tab-content" style="display: none;">
+                        <div class="risk-grid">
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosMetabolicos" value="TRABAJOS EN ALTURA">
+                                <span>TRABAJOS EN ALTURA</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosMetabolicos" value="AD (CTPAT)">
+                                <span>AD (CTPAT)</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosMetabolicos" value="HAS (SMAC 30)">
+                                <span>HAS (SMAC 30)</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosMetabolicos" value="DM Hb Glucocilada">
+                                <span>DM Hb Glucocilada</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosMetabolicos"
+                                    value="DISLIPIDEMIAS (PERFIL DE LIPIDOS)">
+                                <span>DISLIPIDEMIAS (PERFIL DE LIPIDOS)</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosMetabolicos" value="OBESIDAD (SMAC 30)">
+                                <span>OBESIDAD (SMAC 30)</span>
+                            </label>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Contenido Tab Biológicos -->
+
+                    <div id="tabBiologicos" class="tab-content" style="display: none;">
+                        <div class="risk-grid">
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosBiologicos" value="QUIMICOS (SMAC 30, BH)">
+                                <span>QUIMICOS (SMAC 30, BH)</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosBiologicos" value="HEPATITIS A,B,C">
+                                <span>HEPATITIS A,B,C</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosBiologicos" value="VIH">
+                                <span>VIH</span>
+                            </label>
+                            <label class="risk-card">
+                                <input type="checkbox" name="riesgosBiologicos"
+                                    value="COMEDORES INDUSTRIALES (REACCIONES FEBRILES, COPROPARASITOSCOPICO EN SERIE DE 3, EXUDADO FARINGEO)">
+                                <span>COMEDORES INDUSTRIALES (REACCIONES FEBRILES...)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div> <!-- End Risk Tabs Container -->
+
+                <!-- ============================================== -->
+                <!-- NUEVA SECCION: Actividades Adicionales -->
+                <!-- ============================================== -->
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                    <label>Actividades Adicionales</label>
+                    <div class="form-group">
+                        <label for="oficio_externo">¿Qué oficio realiza o alguna otra actividad fuera de la
+                            empresa?</label>
+                        <input type="text" id="oficio_externo" name="oficio_externo" placeholder="Especifique...">
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label for="ortopedico">¿Utiliza algún aparato ortopédico?</label>
+                        <input type="text" id="ortopedico" name="ortopedico" placeholder="Especifique cual...">
+                    </div>
+                </div>
+
+                <!-- ============================================== -->
+                <!-- NUEVA SECCION: Evaluación Médica -->
+                <!-- ============================================== -->
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                    <label>Evaluación Médica Integral</label>
+
+                    <!-- Lateralidad y Deporte (Reubicados) -->
+                    <div class="grid-2" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label>Lateralidad</label>
+                            <select id="lateralidad" name="lateralidad">
+                                <option value="Diestro">Diestro</option>
+                                <option value="Zurdo">Zurdo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>¿Practica Deporte?</label>
+                            <select id="deporte" name="deporte">
+                                <option value="No">No</option>
+                                <option value="Si - Ocasional">Sí - Ocasional</option>
+                                <option value="Si - Regular">Sí - Regular</option>
+                                <option value="Si - Diario">Sí - Diario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <select id="evaluacionSelect" onchange="addEvaluacionItem()" style="flex-grow: 1;">
+                                <option value="" disabled selected>Seleccione elemento con hallazgo (Click para
+                                    agregar)...</option>
+
+                                <optgroup label="Cabeza y Cuello">
+                                    <option value="Craneo">Cráneo</option>
+                                    <option value="Cara">Cara</option>
+                                    <option value="Cuello">Cuello</option>
+                                    <option value="Ojos">Ojos</option>
+                                    <option value="Oidos">Oídos</option>
+                                    <option value="Nariz">Nariz</option>
+                                    <option value="Boca">Boca</option>
+                                    <option value="Faringe">Faringe</option>
+                                </optgroup>
+
+                                <optgroup label="Tronco y Sistemas">
+                                    <option value="Abdomen">Abdomen</option>
+                                    <option value="Columna Vertebral">Columna Vertebral</option>
+                                    <option value="Aparato Respiratorio">Aparato Respiratorio</option>
+                                    <option value="Aparato Cardiovascular">Aparato Cardiovascular</option>
+                                    <option value="Aparato Digestivo">Aparato Digestivo</option>
+                                    <option value="Aparato Genitourinario">Aparato Genitourinario</option>
+                                </optgroup>
+
+                                <optgroup label="Extremidades y Locomotor">
+                                    <option value="MsTs">MsTs (Miembros Torácicos)</option>
+                                    <option value="MsPs">MsPs (Miembros Pélvicos)</option>
+                                    <option value="Articulaciones">Articulaciones</option>
+                                    <option value="Aparato Locomotor Marcha">Aparato Locomotor / Marcha</option>
+                                    <option value="Reflejos OT">Reflejos O.T.</option>
+                                </optgroup>
+
+                                <optgroup label="Piel y General">
+                                    <option value="Piel">Piel</option>
+                                    <option value="Cabello">Cabello</option>
+                                    <option value="Organos y Sentidos">Órganos y Sentidos</option>
+                                    <option value="Sistema Linfatico">Sistema Linfático</option>
+                                    <option value="Sistema Nervioso">Sistema Nervioso</option>
+                                </optgroup>
+
+                                <optgroup label="Otros">
+                                    <option value="Varices">Várices</option>
+                                    <option value="Tatuajes">Tatuajes</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Contenedor Dinámico -->
+                        <div id="evaluacionList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                        <input type="hidden" id="evaluacionData" name="evaluacionData">
+                    </div>
+                </div>
+
+
+                <div class="button-container space-between">
+
+                    <button type="button" class="btn-prev" onclick="prevStep()">&larr; Atrás</button>
+
+                    <button type="button" class="btn-next" onclick="nextStep()">Siguiente &rarr;</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASO 6: Actividades Restringidas -->
+            <div class="form-step" id="step6">
+                <div class="section-title">Actividades Restringidas</div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="restr_enfermedad_general">Enfermedad General</label>
+                        <input type="text" id="restr_enfermedad_general" name="restr_enfermedad_general"
+                            placeholder="Especifique...">
+                    </div>
+                    <div class="form-group">
+                        <label for="restr_riesgo_trabajo">Riesgo de Trabajo</label>
+                        <select id="restr_riesgo_trabajo" name="restr_riesgo_trabajo">
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option value="Químicos">Químicos</option>
+                            <option value="Físicos">Físicos</option>
+                            <option value="Ergonómicos">Ergonómicos</option>
+                            <option value="Metabólicos">Metabólicos</option>
+                            <option value="Biológicos">Biológicos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top: 1rem; align-items: center;">
+                    <div class="form-group">
+                        <label>Tipo de Restricción <span style="color:red">*</span></label>
+                        <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="restr_tipo" value="Temporal" required> Temporal
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="restr_tipo" value="Permanente" required> Permanente
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <!-- Left empty for alignment -->
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="restr_fecha_inicio">Fecha de Inicio</label>
+                        <input type="date" id="restr_fecha_inicio" name="restr_fecha_inicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="restr_fecha_termino">Fecha de Término</label>
+                        <input type="date" id="restr_fecha_termino" name="restr_fecha_termino">
+                    </div>
+                </div>
+
+                <div class="form-group full-width" style="margin-top: 1rem;">
+                    <label for="restr_motivo">Motivo de actividad modificada</label>
+                    <input type="text" id="restr_motivo" name="restr_motivo" placeholder="Especifique el motivo...">
+                </div>
+
+                <div class="form-group full-width" style="margin-top: 1rem;">
+                    <label for="restr_region_afectada">Región afectada</label>
+                    <input type="text" id="restr_region_afectada" name="restr_region_afectada"
+                        placeholder="Especifique la región...">
+                </div>
+
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                    <label style="margin-bottom: 1rem; display: block; font-weight: 700;">Actividades
+                        Restringidas</label>
+                    <div class="risk-grid">
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No cargas mayor a 5kg">
+                            <span>No cargas > 5 Kg</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No ejercer fuerza">
+                            <span>No ejercer fuerza</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No empujar y/o jalar objetos pesados">
+                            <span>No empujar/jalar pesado</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No movimientos repetitivos">
+                            <span>No mov. repetitivos</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No elevar brazo por encima de hombro">
+                            <span>No elevar brazo > hombro</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No uso de herramienta">
+                            <span>No uso de herramienta</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No actividades de pinza fina y gruesa">
+                            <span>No pinza fina/gruesa</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="Intercalar actividades sentado y de pie">
+                            <span>Intercalar sentado/pie</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No Flexión de cintura">
+                            <span>No Flexión de cintura</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="No tiempo extra">
+                            <span>No tiempo extra</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="Bipedestación prolongada">
+                            <span>Bipedestación prolongada</span>
+                        </label>
+                        <label class="risk-card">
+                            <input type="checkbox" name="restr_lista" value="Deambulación prolongada">
+                            <span>Deambulación prolongada</span>
+                        </label>
+                    </div>
+                    <input type="text" id="restr_otros" name="restr_otros" placeholder="Otras restricciones..."
+                        style="margin-top: 1rem; width: 100%;">
+                </div>
+
+                <div class="form-group full-width"
+                    style="margin-top: 2rem; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Estado de Alta del
+                        Paciente</label>
+                    <button type="button" id="btnAlta" onclick="toggleAlta()"
+                        style="padding: 0.75rem 2rem; border-radius: 50px; border: 2px solid #cbd5e1; background: #f1f5f9; color: #64748b; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1rem;">
+                        ALTA OFF
+                    </button>
+                    <input type="hidden" id="restr_alta" name="restr_alta" value="NO">
+                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem;">Marcar como ALTA ON cuando el
+                        paciente haya concluido su periodo de restricción.</p>
+                </div>
+
+                <div class="button-container space-between">
+                    <button type="button" class="btn-prev" onclick="prevStep()">&larr; Atrás</button>
+                    <button type="button" class="btn-next" onclick="nextStep()">Siguiente &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASO 7: Observaciones (Antes Paso 6) -->
+            <div class="form-step" id="step7">
+
+                <div class="section-title">Observaciones</div>
+
+                <div class="form-group full-width">
+                    <label for="notas">Notas Adicionales</label>
+                    <textarea id="notas" name="notas" placeholder="Observaciones generales sobre el paciente..."
+                        required></textarea>
+                </div>
+
+                <!-- SECCIÓN: Cierre y Aptitud -->
+                <div class="grid-2" style="margin-top: 1.5rem; background: #f1f5f9; padding: 1rem; border-radius: 8px;">
+                    <div class="form-group">
+                        <label for="aptitud_medica">Aptitud Médica</label>
+                        <select id="aptitud_medica" name="aptitud_medica" onchange="toggleRestricciones(this)" required>
+                            <option value="Apto">Apto</option>
+                            <option value="Apto con Restricciones">Apto con Restricciones</option>
+                            <option value="No Apto">No Apto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="seguimiento_fecha">Próxima Cita / Seguimiento</label>
+                        <input type="date" id="seguimiento_fecha" name="seguimiento_fecha">
+                    </div>
+                    <div class="form-group full-width" id="restriccionesContainer"
+                        style="display: none; margin-top: 0.5rem;">
+                        <label for="aptitud_restricciones">Especifique Restricciones / Recomendaciones</label>
+                        <textarea id="aptitud_restricciones" name="aptitud_restricciones" rows="2"
+                            placeholder="Ej: No cargar más de 5kg..."></textarea>
+                    </div>
+                </div>
+
+                <!-- AI Suggestion and References Buttons -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <button type="button" onclick="openReferenciasModal()"
+                        style="background: #10b981; color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+                        📚 Ver Referencias Médicas
+                    </button>
+                </div>
+
+
+                <div class="button-container space-between">
+
+                    <button type="button" class="btn-prev" onclick="prevStep()">&larr; Atrás</button>
+
+                    <button type="submit" id="submitBtn">Guardar Registro</button>
+
+                </div>
+
+            </div>
+
+    </div>
+
+
+
+    </form>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- PRIVACY NOTICE MODAL -->
+    <!-- ============================================== -->
+    <div id="avisoPrivacidadModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center; padding: 1rem;">
+        <div
+            style="background: white; border-radius: 12px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);">
+            <div
+                style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1;">
+                <h2 style="margin: 0; color: #1e40af; font-size: 1.25rem;">📜 Aviso de Privacidad Integral</h2>
+                <button type="button" onclick="closeAvisoModal()"
+                    style="background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; line-height: 1;">&times;</button>
+            </div>
+            <div style="padding: 1.5rem; line-height: 1.7; color: #374151;">
+                <p><strong>INDUSTRIAS HUNTER, S. DE R.L. DE C.V.</strong>, con domicilio en <strong>C. Nordika #8615,
+                        Parque Industrial Nordica, Ejido Lazaro Cardenas, 22640 Tijuana, B.C.</strong>, es el
+                    responsable del uso y protección de sus datos personales, y al respecto le informa lo siguiente:</p>
+
+                <h3 style="color: #1e40af; margin-top: 1.5rem;">¿Para qué fines utilizaremos sus datos personales?</h3>
+                <ul>
+                    <li>Crear y mantener un expediente clínico interno para seguimiento de su salud.</li>
+                    <li>Generar reportes y gráficas de evolución antropométrica.</li>
+                    <li>Detectar riesgos de salud ocupacional dentro de las instalaciones.</li>
+                    <li>Brindar recomendaciones dietéticas y de estilo de vida.</li>
+                </ul>
+
+                <h3 style="color: #1e40af; margin-top: 1.5rem;">¿Qué datos personales utilizaremos?</h3>
+                <p><strong>Datos de identificación:</strong> Nombre completo, edad, fecha de nacimiento, género.</p>
+                <p><strong>Datos de contacto:</strong> Teléfono, correo electrónico.</p>
+                <p><strong>Datos laborales:</strong> Número de empleado, puesto, área, turno.</p>
+                <p style="background: #fef3c7; padding: 0.75rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <strong>⚠️ Datos SENSIBLES:</strong> Peso, talla, IMC, porcentaje de grasa corporal, masa muscular,
+                    grasa visceral, presión arterial, glucosa, oximetría, temperatura, antecedentes patológicos
+                    (diabetes, hipertensión, etc.), y hábitos personales (tabaco, alcohol, actividad física).
+                </p>
+
+                <h3 style="color: #1e40af; margin-top: 1.5rem;">Fundamento Legal</h3>
+                <p>El tratamiento de sus datos personales sensibles se realiza con fundamento en la <strong>Ley Federal
+                        de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong>.</p>
+
+                <h3 style="color: #1e40af; margin-top: 1.5rem;">¿Con quién compartimos su información?</h3>
+                <p>Sus datos personales <strong>NO</strong> serán compartidos con terceros ajenos a la organización,
+                    salvo requerimiento de autoridad competente.</p>
+
+                <h3 style="color: #1e40af; margin-top: 1.5rem;">Derechos ARCO</h3>
+                <p>Usted tiene derecho a Acceder, Rectificar, Cancelar u Oponerse al tratamiento de sus datos
+                    personales. Para ejercer estos derechos, envíe su solicitud a:
+                    <strong>serviciomedico.tijuana@hunter.global</strong>
+                </p>
+
+                <div
+                    style="margin-top: 2rem; padding: 1rem; background: #f0fdf4; border-radius: 8px; text-align: center;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #166534;">📄 Este aviso debe ser firmado físicamente
+                        por el paciente antes de proceder con la captura de datos en el sistema.</p>
+                </div>
+            </div>
+            <div
+                style="padding: 1rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 1rem; position: sticky; bottom: 0; background: white;">
+                <button type="button" onclick="closeAvisoModal()"
+                    style="background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 500;">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- MEDICAL REFERENCES MODAL -->
+    <!-- ============================================== -->
+    <div id="referenciasModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center; padding: 1rem;">
+        <div
+            style="background: white; border-radius: 12px; width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);">
+            <div
+                style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1;">
+                <h2 style="margin: 0; color: #1e40af; font-size: 1.25rem;"> Referencias Médicas y Científicas</h2>
+                <button type="button" onclick="closeReferenciasModal()"
+                    style="background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; line-height: 1;">&times;</button>
+            </div>
+            <div style="padding: 1.5rem; line-height: 1.8; color: #374151;">
+
+                <p
+                    style="background: #eff6ff; padding: 1rem; border-radius: 8px; border-left: 4px solid #3b82f6; margin-bottom: 1.5rem;">
+                    Los criterios de clasificación utilizados en este sistema se basan en las siguientes fuentes
+                    científicas y organizaciones de salud internacionalmente reconocidas:
+                </p>
+
+                <h3
+                    style="color: #1e40af; margin-top: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                    1. Índice de Masa Corporal (IMC)</h3>
+                <ul style="list-style-type: disc; margin-left: 1.5rem;">
+                    <li><strong>Organización Mundial de la Salud (OMS).</strong> "Body mass index – BMI". WHO Technical
+                        Report Series. Ginebra, 2024.</li>
+                    <li><strong>World Obesity Federation.</strong> "Classification of obesity". World Obesity Atlas
+                        2024.</li>
+                    <li>Clasificación: Bajo peso (<18.5), Normal (18.5-24.9), Sobrepeso (25-29.9), Obesidad I (30-34.9),
+                            Obesidad II (35-39.9), Obesidad III (≥40).</li>
+                </ul>
+
+                <h3
+                    style="color: #1e40af; margin-top: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                    2. Presión Arterial</h3>
+                <ul style="list-style-type: disc; margin-left: 1.5rem;">
+                    <li><strong>American Heart Association (AHA) / American College of Cardiology (ACC).</strong> "2017
+                        ACC/AHA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood
+                        Pressure in Adults". Journal of the American College of Cardiology, 2018.</li>
+                    <li>Clasificación: Normal (<120 /80), Elevada (120-129/<80), Hipertensión Etapa 1 (130-139/80-89),
+                            Hipertensión Etapa 2 (≥140/≥90).</li>
+                </ul>
+
+                <h3
+                    style="color: #1e40af; margin-top: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                    3. Glucosa en Ayunas</h3>
+                <ul style="list-style-type: disc; margin-left: 1.5rem;">
+                    <li><strong>American Diabetes Association (ADA).</strong> "Standards of Care in Diabetes—2024".
+                        Diabetes Care, Vol. 47, Supplement 1, 2024.</li>
+                    <li>Clasificación: Normal (<100 mg/dL), Prediabetes (100-125 mg/dL), Diabetes (≥126 mg/dL).</li>
+                </ul>
+
+                <h3
+                    style="color: #1e40af; margin-top: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                    4. Porcentaje de Grasa Corporal</h3>
+                <ul style="list-style-type: disc; margin-left: 1.5rem;">
+                    <li><strong>American Council on Exercise (ACE).</strong> "Percent Body Fat Norms". ACE Personal
+                        Trainer Manual, 6th Edition, 2020.</li>
+                    <li><strong>Gallagher D, et al.</strong> "Healthy percentage body fat ranges: an approach for
+                        developing guidelines based on body mass index". The American Journal of Clinical Nutrition,
+                        2000.</li>
+                    <li>Clasificación variada por edad y género (ver tablas ACE).</li>
+                </ul>
+
+                <h3
+                    style="color: #1e40af; margin-top: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                    5. Grasa Visceral</h3>
+                <ul style="list-style-type: disc; margin-left: 1.5rem;">
+                    <li><strong>Tanita Corporation.</strong> "Understanding Your Measurements - Visceral Fat Rating".
+                        Tanita Innerscan Technology, 2023.</li>
+                    <li><strong>Omron Healthcare.</strong> "Body Composition Metrics". Omron VIVA Body Composition
+                        Monitor Reference Guide, 2022.</li>
+                    <li>Clasificación: Normal (1-9), Alto (10-14), Muy Alto (≥15).</li>
+                </ul>
+
+                <h3
+                    style="color: #1e40af; margin-top: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">
+                    6. Masa Muscular</h3>
+                <ul style="list-style-type: disc; margin-left: 1.5rem;">
+                    <li><strong>Janssen I, et al.</strong> "Skeletal muscle mass and distribution in 468 men and women
+                        aged 18-88 yr". Journal of Applied Physiology, 2000.</li>
+                    <li><strong>Cruz-Jentoft AJ, et al.</strong> "Sarcopenia: revised European consensus on definition
+                        and diagnosis". Age and Ageing, 2019.</li>
+                </ul>
+
+                <div
+                    style="margin-top: 2rem; padding: 1rem; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #92400e;"><strong>⚠️ Aviso:</strong> Las sugerencias
+                        generadas por este sistema son de apoyo administrativo y no constituyen un diagnóstico médico.
+                        Consulte siempre con un profesional de la salud para la interpretación clínica de los
+                        resultados.</p>
+                </div>
+            </div>
+            <div
+                style="padding: 1rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 1rem; position: sticky; bottom: 0; background: white;">
+                <button type="button" onclick="closeReferenciasModal()"
+                    style="background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 500;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- DASHBOARD SECTION - ANALYTICS -->
+    <!-- ============================================== -->
+    <div id="dashboardSection" class="dashboard-section"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 2rem; box-sizing: border-box; z-index: 1000; background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9));">
+        <div style="width: 100%; max-width: 1600px; margin: 0 auto;">
+
+            <!-- Dashboard Header -->
+            <div class="section-title"
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <span style="color: white;">Gráficas Generales</span>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <!-- Export Dropdown -->
+                    <div class="export-dropdown" style="position: relative;">
+                        <button type="button" id="exportReportBtn" class="btn-next"
+                            style="margin: 0; background: linear-gradient(135deg, #8b5cf6, #7c3aed); display: flex; align-items: center; gap: 0.5rem;">
+                            📥 Descargar Reporte ▾
+                        </button>
+                        <div id="exportDropdownMenu" class="export-dropdown-menu"
+                            style="display: none; position: absolute; top: 100%; right: 0; margin-top: 0.5rem; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); min-width: 180px; z-index: 1001; overflow: hidden;">
+                            <button type="button" onclick="openPDFSelectionModal()"
+                                style="width: 100%; padding: 0.75rem 1rem; border: none; background: white; text-align: left; cursor: pointer; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;"
+                                onmouseover="this.style.background='#f1f5f9'"
+                                onmouseout="this.style.background='white'">
+                                📄 Exportar a PDF
+                            </button>
+                            <button type="button" onclick="generateExcelReport()"
+                                style="width: 100%; padding: 0.75rem 1rem; border: none; background: white; text-align: left; cursor: pointer; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; border-top: 1px solid #e5e7eb; transition: background 0.2s;"
+                                onmouseover="this.style.background='#f1f5f9'"
+                                onmouseout="this.style.background='white'">
+                                📊 Exportar a Excel
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-next" onclick="triggerDashboardUpdate()"
+                        style="margin: 0; background-color: #0ea5e9;">Actualizar Gráficas</button>
+                    <button type="button" class="btn-prev" onclick="closeDashboard()" style="margin: 0;">←
+                        Volver</button>
+                </div>
+            </div>
+            <!-- Filters Row -->
+            <div id="dashboardFilters"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: linear-gradient(135deg, #10b981, #059669); border-radius: 12px;">
+                <div class="filter-group" style="text-align: center;">
+                    <label
+                        style="font-size: 1.2rem; color: white; margin-bottom: 0.25rem; display: block; font-weight: 500;">Planta</label>
+                    <select id="filterPlanta" onchange="applyDashboardFilters()" class="form-control"
+                        style="padding: 0.5rem;">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="text-align: center;">
+                    <label
+                        style="font-size: 1.2rem; color: white; margin-bottom: 0.25rem; display: block; font-weight: 500;">Programa</label>
+                    <select id="filterPrograma" onchange="applyDashboardFilters()" class="form-control"
+                        style="padding: 0.5rem;">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="text-align: center;">
+                    <label
+                        style="font-size: 1.2rem; color: white; margin-bottom: 0.25rem; display: block; font-weight: 500;">Género</label>
+                    <select id="filterGenero" onchange="applyDashboardFilters()" class="form-control"
+                        style="padding: 0.5rem;">
+                        <option value="">Todos</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="text-align: center;">
+                    <label
+                        style="font-size: 1.2rem; color: white; margin-bottom: 0.25rem; display: block; font-weight: 500;">Turno</label>
+                    <select id="filterTurno" onchange="applyDashboardFilters()" class="form-control"
+                        style="padding: 0.5rem;">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="text-align: center;">
+                    <label
+                        style="font-size: 1.2rem; color: white; margin-bottom: 0.25rem; display: block; font-weight: 500;">Desde</label>
+                    <input type="date" id="filterFechaDesde" onchange="applyDashboardFilters()" class="form-control"
+                        style="padding: 0.5rem;">
+                </div>
+                <div class="filter-group" style="text-align: center;">
+                    <label
+                        style="font-size: 1.2rem; color: white; margin-bottom: 0.25rem; display: block; font-weight: 500;">Hasta</label>
+                    <input type="date" id="filterFechaHasta" onchange="applyDashboardFilters()" class="form-control"
+                        style="padding: 0.5rem;">
+                </div>
+                <div class="filter-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" onclick="clearDashboardFilters()"
+                        style="background: white; color: #059669; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 500;">Limpiar
+                        Filtros</button>
+                </div>
+            </div>
+
+            <!-- KPI Cards Row - 4 columns -->
+            <div id="kpiCards"
+                style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                <div class="kpi-card"
+                    style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.85rem; opacity: 0.9;">Total Empleados</div>
+                    <div id="kpiTotal" style="font-size: 2.5rem; font-weight: bold;">--</div>
+                </div>
+                <div class="kpi-card"
+                    style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.85rem; opacity: 0.9;">Promedio IMC</div>
+                    <div id="kpiIMC" style="font-size: 2.5rem; font-weight: bold;">--</div>
+                </div>
+                <div class="kpi-card"
+                    style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.85rem; opacity: 0.9;">% Sobrepeso/Obesidad</div>
+                    <div id="kpiObesidad" style="font-size: 2.5rem; font-weight: bold;">--</div>
+                </div>
+                <div class="kpi-card"
+                    style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.85rem; opacity: 0.9;">% Hipertensión</div>
+                    <div id="kpiHipertension" style="font-size: 2.5rem; font-weight: bold;">--</div>
+                </div>
+            </div>
+
+            <!-- Charts Grid - 3 columns -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; padding-bottom: 3rem;">
+
+                <!-- Chart: IMC Distribution -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Distribución de IMC</h4>
+                    <div id="chartIMC"></div>
+                </div>
+
+                <!-- Chart: Gender -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Distribución por Género</h4>
+                    <div id="chartGenero"></div>
+                </div>
+
+                <!-- Chart: Programs -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Programas de Salud</h4>
+                    <div id="chartProgramas"></div>
+                </div>
+
+                <!-- Chart: Plants -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Empleados evaluados por planta
+                    </h4>
+                    <div id="chartPlantas"></div>
+                </div>
+
+                <!-- Chart: Shifts -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Distribución por Turno</h4>
+                    <div id="chartTurnos"></div>
+                </div>
+
+                <!-- Chart: Age Range -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Rango de Edades</h4>
+                    <div id="chartEdades"></div>
+                </div>
+
+                <!-- Chart: Glucosa Distribution -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Distribución de Glucosa</h4>
+                    <div id="chartGlucosa"></div>
+                </div>
+
+                <!-- Chart: Blood Pressure Distribution -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Distribución de Presión Arterial
+                    </h4>
+                    <div id="chartPresion"></div>
+                </div>
+
+                <!-- Chart: Top 10 Padecimientos -->
+                <div class="chart-card"
+                    style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #1e293b; text-align: center;">Principales Padecimientos</h4>
+                    <div id="chartPadecimientos"></div>
+                </div>
+
+            </div>
+            <!-- Loading Overlay -->
+            <div id="dashboardLoading"
+                style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.95); z-index: 9999; justify-content: center; align-items: center;">
+                <div class="liquid-loader">
+                    <div class="loading-text">
+                        Cargando<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+                    </div>
+                    <div class="loader-track">
+                        <div class="liquid-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; margin-bottom: 0.5rem;">
+                <h3 class="modal-title" style="color: var(--primary-color);">🔐 Acceso Restringido</h3>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Por favor, ingrese la contraseña de
+                administrador para continuar.</p>
+
+            <div class="password-input-wrapper" style="margin-bottom: 2rem;">
+                <input type="password" id="adminPassword" placeholder="Contraseña..."
+                    style="font-size: 1.2rem; text-align: center; margin-bottom: 0; letter-spacing: 2px;"
+                    onkeydown="if(event.key === 'Enter') confirmPassword()">
+                <button type="button" class="password-toggle-btn"
+                    onclick="togglePasswordVisibility('adminPassword', this)" title="Ver contraseña">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="button-container space-between" style="margin-top: 0; border-top: none;">
+                <button type="button" class="btn-prev" onclick="closePasswordModal()"
+                    style="width: 45%;">Cancelar</button>
+                <button type="button" class="btn-next" onclick="confirmPassword()"
+                    style="width: 45%;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Suggestion Modal -->
+    <div id="aiSuggestionModal" class="modal-overlay" style="display: none; z-index: 10001;">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; margin-bottom: 0.5rem;">
+                <h3 class="modal-title" style="color: var(--primary-color);">Observación Sugerida</h3>
+            </div>
+
+            <div id="aiLoading" style="padding: 2rem;">
+                <p style="font-size: 2rem;">🧠</p>
+                <p style="color: var(--text-muted); font-weight: 500;">Analizando datos del paciente...</p>
+            </div>
+
+            <div id="aiResult" style="display: none;">
+                <textarea id="aiSuggestionText"
+                    style="width: 100%; height: 150px; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 1.5rem; font-family: inherit; font-size: 0.95rem; line-height: 1.5;"
+                    readonly></textarea>
+
+                <div class="button-container space-between" style="margin-top: 0; border-top: none; gap: 1rem;">
+                    <button type="button" class="btn-prev" onclick="closeAiSuggestion()"
+                        style="width: 45%; background-color: #94a3b8; color: white; border: none;">Ignorar</button>
+                    <button type="button" class="btn-next" onclick="useAiSuggestion()"
+                        style="width: 45%; background-color: #10b981; border: none;">Usar Observación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- PLANTILLA PDF 2026 FULL REPORT -->
+
+    <div id="pdfTemplate"
+        style="display:none; width: 780px; background-color: white !important; min-height: 1120px; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0 auto;">
+
+        <style>
+            #pdfTemplate * {
+                box-sizing: border-box;
+            }
+
+            .pdf-container {
+                padding: 30px;
+            }
+
+            .pdf-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 2px solid #0f172a;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+
+            .pdf-logo {
+                height: 60px;
+                width: auto;
+            }
+
+            .pdf-title-box {
+                text-align: left;
+            }
+
+            .pdf-title {
+                color: #0f172a;
+                font-size: 20px;
+                font-weight: 800;
+                margin: 0;
+            }
+
+            .pdf-subtitle {
+                color: #64748b;
+                font-size: 12px;
+                margin: 2px 0 0;
+            }
+
+            .pdf-section {
+                margin-bottom: 15px;
+                page-break-inside: avoid;
+            }
+
+            .pdf-section-title {
+                background: #f8fafc;
+                color: #1e293b;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                padding: 4px 8px;
+                border-left: 4px solid #0f172a;
+                margin-bottom: 8px;
+            }
+
+            .pdf-grid-2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+
+            .pdf-grid-3 {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 10px;
+            }
+
+            .pdf-grid-4 {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                gap: 10px;
+            }
+
+            .pdf-field {
+                margin-bottom: 6px;
+            }
+
+            .pdf-label {
+                display: block;
+                font-size: 8px;
+                color: #64748b;
+                font-weight: 700;
+                text-transform: uppercase;
+                margin-bottom: 1px;
+            }
+
+            .pdf-value {
+                font-size: 10.5px;
+                color: #0f172a;
+                font-weight: 500;
+                border-bottom: 1px solid #e2e8f0;
+                min-height: 16px;
+                padding-bottom: 1px;
+            }
+
+            .pdf-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 5px;
+            }
+
+            .pdf-table th {
+                background: #f1f5f9;
+                color: #475569;
+                font-size: 9px;
+                padding: 4px 6px;
+                text-align: left;
+                border: 1px solid #e2e8f0;
+            }
+
+            .pdf-table td {
+                font-size: 10px;
+                padding: 4px 6px;
+                border: 1px solid #e2e8f0;
+            }
+
+            .pdf-box {
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                padding: 8px;
+                background: #fff;
+            }
+
+            .pdf-risk-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 5px;
+            }
+
+            .pdf-risk-item {
+                font-size: 9px;
+                border: 1px solid #e2e8f0;
+                padding: 4px;
+                border-radius: 3px;
+                background: #f8fafc;
+            }
+
+            .pdf-risk-item strong {
+                display: block;
+                font-size: 8px;
+                color: #64748b;
+                margin-bottom: 2px;
+            }
+
+            .pdf-hallazgo {
+                margin-bottom: 3px;
+                padding-bottom: 2px;
+                border-bottom: 1px dotted #e2e8f0;
+                font-size: 10px;
+            }
+
+            .pdf-hallazgo strong {
+                color: #1e40af;
+            }
+
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+
+                #pdfPreviewModal,
+                #pdfPreviewModal * {
+                    visibility: visible;
+                }
+
+                #pdfPreviewModal {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: auto !important;
+                    display: block !important;
+                    background: white !important;
+                    overflow: visible !important;
+                }
+
+                #pdfPreviewModal .modal-content {
+                    box-shadow: none !important;
+                    border: none !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    height: auto !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    display: block !important;
+                    overflow: visible !important;
+                }
+
+                #pdfPreviewBody {
+                    padding: 0 !important;
+                    background: white !important;
+                    display: block !important;
+                    height: auto !important;
+                    overflow: visible !important;
+                }
+
+                .pdf-container {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    width: 100% !important;
+                    box-shadow: none !important;
+                }
+
+                /* Hide UI buttons during print */
+                #pdfPreviewModal button,
+                #pdfPreviewModal .close-modal-btn,
+                #pdfPreviewModal h3 {
+                    display: none !important;
+                }
+
+                /* Show the report header instead of modal header */
+                #pdfPreviewModal div[style*="background: white"] {
+                    display: none !important;
+                }
+
+                @page {
+                    size: auto;
+                    margin: 10mm;
+                }
+            }
+        </style>
+        <div class="pdf-container">
+            <!-- HEADER -->
+            <div class="pdf-header">
+                <div style="display:flex; align-items:center; gap: 15px;">
+                    <img src="/assets/branding/EHS.png" class="pdf-logo" alt="Logo">
+                </div>
+                <div style="text-align: right;">
+                    <p class="pdf-label">Fecha de Generación</p>
+                    <p id="pdf_fechaGen" style="margin:0; font-size: 11px; font-weight:700;">--</p>
+                    <p class="pdf-label" style="margin-top:5px;">Servicio Médico EHS</p>
+                </div>
+            </div>
+
+            <!-- 1. DATOS PERSONALES -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">1. Datos del Paciente / Empleado</div>
+                <div class="pdf-grid-4">
+                    <div class="pdf-field"><span class="pdf-label">Nombre Completo</span>
+                        <div id="pdf_nombre" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">No. Empleado</span>
+                        <div id="pdf_num" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Género</span>
+                        <div id="pdf_genero" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Edad</span>
+                        <div id="pdf_edad" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Estado Civil</span>
+                        <div id="pdf_estadoCivil" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Lugar de Nacimiento</span>
+                        <div id="pdf_nacimiento" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Escolaridad</span>
+                        <div id="pdf_escolaridad" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Contacto</span>
+                        <div id="pdf_contacto" class="pdf-value">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. INFO LABORAL -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">2. Información Laboral y Programas</div>
+                <div class="pdf-grid-4">
+                    <div class="pdf-field"><span class="pdf-label">Planta</span>
+                        <div id="pdf_planta" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Área</span>
+                        <div id="pdf_area" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Puesto</span>
+                        <div id="pdf_puesto" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Turno</span>
+                        <div id="pdf_turno" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Supervisor</span>
+                        <div id="pdf_supervisor" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Ingreso Puesto</span>
+                        <div id="pdf_ingresoPuesto" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Antigüedad Puesto</span>
+                        <div id="pdf_antiguedadPuesto" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Ingreso Empresa</span>
+                        <div id="pdf_ingresoEmpresa" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Antigüedad Empresa</span>
+                        <div id="pdf_antiguedadEmpresa" class="pdf-value">--</div>
+                    </div>
+                </div>
+                <div class="pdf-grid-2" style="margin-top:5px;">
+                    <div class="pdf-field"><span class="pdf-label">Programas de Salud</span>
+                        <div id="pdf_programas" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Funciones Principales</span>
+                        <div id="pdf_funciones" class="pdf-value">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. EVALUACION ANTROPOMETRICA Y SIGNOS -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">3. Evaluación Antropométrica y Signos Vitales</div>
+                <div class="pdf-grid-4">
+                    <div class="pdf-field"><span class="pdf-label">Peso (kg)</span>
+                        <div id="pdf_peso" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Talla (cm)</span>
+                        <div id="pdf_talla" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">IMC</span>
+                        <div id="pdf_imc" class="pdf-value" style="font-weight:700;">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">% Grasa</span>
+                        <div id="pdf_fat" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">% Músculo</span>
+                        <div id="pdf_musc" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Grasa Visceral</span>
+                        <div id="pdf_visc" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Body Age</span>
+                        <div id="pdf_bodyage" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">RMI (kcal)</span>
+                        <div id="pdf_rmi" class="pdf-value">--</div>
+                    </div>
+                </div>
+                <div class="pdf-grid-4" style="margin-top:5px;">
+                    <div class="pdf-field"><span class="pdf-label">Tensión Arterial</span>
+                        <div id="pdf_ta" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Pulso (bpm)</span>
+                        <div id="pdf_pulso" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Oximetría (%)</span>
+                        <div id="pdf_oximetria" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Glucosa (mg/dL)</span>
+                        <div id="pdf_gluco" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Temperatura (°C)</span>
+                        <div id="pdf_temp" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Agudeza Visual</span>
+                        <div id="pdf_agudezaVisual" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Agudeza Auditiva</span>
+                        <div id="pdf_agudezaAuditiva" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Lateralidad</span>
+                        <div id="pdf_lateralidad" class="pdf-value">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. HISTORIA MEDICA Y FACTORES -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">4. Antecedentes Médicos y Factores de Riesgo</div>
+
+                <div class="pdf-grid-2">
+                    <!-- AHF -->
+                    <div class="pdf-box">
+                        <span class="pdf-label"
+                            style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:3px; margin-bottom:5px;">Antecedentes
+                            Heredofamiliares (AHF)</span>
+                        <div style="font-size: 9.5px; line-height: 1.4;">
+                            <div id="pdf_ahf_diabetes"></div>
+                            <div id="pdf_ahf_hipertension"></div>
+                            <div id="pdf_ahf_cancer"></div>
+                            <div id="pdf_ahf_cardiopatias"></div>
+                            <div id="pdf_ahf_otros" style="margin-top:3px; color:#64748b;"></div>
+                        </div>
+                    </div>
+                    <!-- Hábitos -->
+                    <div class="pdf-box">
+                        <span class="pdf-label"
+                            style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:3px; margin-bottom:5px;">Hábitos
+                            Nocivos</span>
+                        <div style="font-size: 9.5px; line-height: 1.4;">
+                            <div id="pdf_habito_alcohol"></div>
+                            <div id="pdf_habito_tabaco"></div>
+                            <div id="pdf_habito_drogas"></div>
+                            <div id="pdf_habito_meds"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pdf-grid-2" style="margin-top:10px;">
+                    <!-- Patologías -->
+                    <div class="pdf-field">
+                        <span class="pdf-label">Patologías / Antecedentes Personales</span>
+                        <div id="pdf_patologias" class="pdf-value" style="height:auto;">--</div>
+                    </div>
+                    <!-- Vacunas / Alergias -->
+                    <div class="pdf-grid-2">
+                        <div class="pdf-field">
+                            <span class="pdf-label">Vacunas</span>
+                            <div id="pdf_vacunas" class="pdf-value">--</div>
+                        </div>
+                        <div class="pdf-field">
+                            <span class="pdf-label" style="color:#ef4444;">Alergias Meds</span>
+                            <div id="pdf_alergias" class="pdf-value" style="background:#fff1f2;">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. RIESGOS Y ACTIVIDADES -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">5. Exposición Laboral y Actividades</div>
+                <div class="pdf-risk-grid">
+                    <div class="pdf-risk-item"><strong>Químicos</strong>
+                        <div id="pdf_r_quimicos">--</div>
+                    </div>
+                    <div class="pdf-risk-item"><strong>Físicos</strong>
+                        <div id="pdf_r_fisicos">--</div>
+                    </div>
+                    <div class="pdf-risk-item"><strong>Ergonómicos</strong>
+                        <div id="pdf_r_ergonomicos">--</div>
+                    </div>
+                    <div class="pdf-risk-item"><strong>Metabólicos</strong>
+                        <div id="pdf_r_metabolicos">--</div>
+                    </div>
+                    <div class="pdf-risk-item"><strong>Biológicos</strong>
+                        <div id="pdf_r_biologicos">--</div>
+                    </div>
+                </div>
+                <div class="pdf-grid-3" style="margin-top:8px;">
+                    <div class="pdf-field"><span class="pdf-label">Oficio Externo</span>
+                        <div id="pdf_oficioExterno" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Deporte</span>
+                        <div id="pdf_deporte" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Aparato Ortopédico</span>
+                        <div id="pdf_ortopedico" class="pdf-value">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. EXPLORACION FISICA (DINAMICA) -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">6. Hallazgos en Exploración Física</div>
+                <div id="pdf_evaluacionHallazgos" class="pdf-box" style="min-height:50px;">
+                    <!-- Se llena con JS -->
+                    <div style="color:#94a3b8; font-style:italic; font-size:10px;">Sin hallazgos reportados.
+                    </div>
+                </div>
+            </div>
+
+            <!-- GINECO (Solo si aplica) -->
+            <div id="pdf_gineco_section" class="pdf-section" style="display:none;">
+                <div class="pdf-section-title">7. Antecedentes Ginecológicos</div>
+                <div class="pdf-grid-4">
+                    <div class="pdf-field"><span class="pdf-label">Menarca</span>
+                        <div id="pdf_g_menarca" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">FUM</span>
+                        <div id="pdf_g_fum" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Planificación</span>
+                        <div id="pdf_g_plan" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">G / P / C / A</span>
+                        <div id="pdf_g_gpca" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Últ. Papanicolau</span>
+                        <div id="pdf_g_papa" class="pdf-value">--</div>
+                    </div>
+                    <div class="pdf-field"><span class="pdf-label">Últ. Mastografía</span>
+                        <div id="pdf_g_masto" class="pdf-value">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CIERRE -->
+            <div class="pdf-section">
+                <div class="pdf-section-title">Resultados y Observaciones</div>
+                <div class="pdf-grid-2">
+                    <div class="pdf-field">
+                        <span class="pdf-label">Notas Médicas / Observaciones</span>
+                        <div id="pdf_notas" class="pdf-value"
+                            style="height:auto; min-height:80px; border:1px solid #e2e8f0; padding:5px; background:#fdfdfd; white-space:pre-wrap;">
+                            --</div>
+                    </div>
+                    <div class="pdf-box"
+                        style="display:flex; flex-direction:column; justify-content:center; align-items:center; background:#f1f5f9;">
+                        <span class="pdf-label" style="font-size:10px; margin-bottom:5px;">Aptitud Médica</span>
+                        <div id="pdf_aptitud"
+                            style="font-size:18px; font-weight:800; color:#0f172a; text-transform:uppercase;">--
+                        </div>
+                        <div id="pdf_restricciones"
+                            style="font-size:9px; color:#ef4444; margin-top:5px; text-align:center;"></div>
+                        <div style="margin-top:15px; text-align:center;">
+                            <p class="pdf-label">Seguimiento</p>
+                            <p id="pdf_seguimiento" style="font-size:11px; font-weight:700; margin:0;">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FIRMAS -->
+            <div style="margin-top:50px; display:grid; grid-template-columns: 1fr 100px 1fr; gap: 20px;">
+                <div style="text-align:center;">
+                    <div style="border-top:1px solid #1e293b; margin-top:30px; padding-top:5px;">
+                        <p style="font-size:10px; font-weight:700; margin:0;">Firma del Médico / Enfermería</p>
+                        <p style="font-size:8px; color:#64748b; margin:0;">Cédula Profesional</p>
+                    </div>
+                </div>
+                <div></div>
+                <div style="text-align:center;">
+                    <div style="border-top:1px solid #1e293b; margin-top:30px; padding-top:5px;">
+                        <p style="font-size:10px; font-weight:700; margin:0;">Firma del Colaborador</p>
+                        <p style="font-size:8px; color:#64748b; margin:0;">Consentimiento Informado</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF SELECTION MODAL -->
+    <div id="pdfModal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closePDFModal()">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Generar Reporte PDF</h3>
+                <button onclick="closePDFModal()" class="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">Selecciona el registro que
+                    deseas
+                    visualizar.</p>
+                <div id="pdfModalList"
+                    style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+                    <!-- Items injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF PREVIEW MODAL -->
+    <div id="pdfPreviewModal" class="modal-overlay" style="display:none;"
+        onclick="if(event.target === this) closePreviewModal()">
+        <div class="modal-content"
+            style="max-width: 850px; padding: 0; background-color: #f1f5f9; position: relative; display: flex; flex-direction: column; height: 90vh;">
+            <div
+                style="padding: 15px 25px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b;">Vista Previa del Reporte</h3>
+                <div style="display:flex; gap: 10px;">
+                    <button onclick="confirmDownloadPDF()" class="btn-primary"
+                        style="padding: 8px 16px; font-size: 0.9rem;">Imprimir / Guardar PDF</button>
+                    <button onclick="closePreviewModal()" class="btn-prev"
+                        style="padding: 8px 16px; font-size: 0.9rem; border: 1px solid #cbd5e1;">Cerrar</button>
+                </div>
+            </div>
+            <div id="pdfPreviewBody"
+                style="padding: 30px; flex: 1; overflow-y: auto; display: flex; justify-content: center; background-color: #ffffff;">
+                <!-- PDF Rendered here -->
+            </div>
+        </div>
+    </div>
+
+
+    <div id="hunterGenericModal" class="modal-overlay"
+        style="display: none; z-index: 9999; backdrop-filter: blur(12px); background: rgba(15, 23, 42, 0.7);">
+        <div class="modal-content"
+            style="max-width: 480px; text-align: center; border: none; border-radius: 12px; padding: 0; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6); background: white; overflow: hidden; position: relative; animation: modalSpring 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+
+            <style>
+                @keyframes modalSpring {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.8) translateY(30px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                    }
+                }
+
+                @keyframes gradientRun {
+                    0% {
+                        background-position: 0% 50%;
+                    }
+
+                    100% {
+                        background-position: 200% 50%;
+                    }
+                }
+
+                .modal-icon-box {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 12px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background: white;
+                    padding: 8px;
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                }
+
+                .modal-icon-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+
+                .animated-header {
+                    background: linear-gradient(90deg, #0b4f35, #10b981, #ffffff, #0ea5e9, #10b981, #0b4f35);
+                    background-size: 300% 100%;
+                    animation: gradientRun 2s linear infinite;
+                }
+            </style>
+
+            <!-- Top Decorative Bar with Logo and Running Gradient -->
+            <div id="hunterModalBar" class="animated-header"
+                style="height: 120px; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1;">
+                <div class="modal-icon-box" id="hunterModalIconContainer">
+                    <img id="hunterModalLogo" src="/assets/branding/EHS.png" class="modal-icon-img" alt="EHS Logo">
+                    <i id="hunterModalIcon" data-lucide="info" style="width: 32px; height: 32px; display: none;"></i>
+                </div>
+            </div>
+
+            <div style="padding: 2.5rem 2.5rem 2rem 2.5rem; position: relative; z-index: 1;">
+
+                <h3 id="hunterModalTitle"
+                    style="color: #0f172a; font-size: 1.75rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em;">
+                    Título</h3>
+
+                <p id="hunterModalMessage"
+                    style="color: #64748b; margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.6; font-weight: 500; padding: 0 10px;">
+                    Mensaje
+                </p>
+
+                <!-- Acciones -->
+                <div id="hunterModalActions" style="display: flex; gap: 12px; justify-content: center;">
+                    <button id="hunterBtnCancel" type="button" class="btn-prev"
+                        style="display:none; flex: 1; padding: 1rem; border-radius: 16px; font-weight: 700; border: 2px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s;">Cancelar</button>
+                    <button id="hunterBtnOk" type="button" class="btn-next"
+                        style="flex: 1; padding: 1rem; border-radius: 16px; font-weight: 800; font-size: 1rem; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); transition: all 0.2s;">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refactored Scripts -->
+    <script src="/src/client/js/config.js?v=4.4"></script>
+    <script src="/src/client/js/data.js?v=4.4"></script>
+    <script src="/src/client/js/auth.js?v=4.4"></script>
+    <script src="/src/client/js/pdf.js?v=4.4"></script>
+    <script src="/src/client/js/dashboard.js?v=4.4"></script>
+    <script src="/src/client/js/ai.js?v=4.4"></script>
+    <script src="/src/client/js/export.js?v=4.4"></script>
+    <script src="/src/client/js/app.js?v=4.4"></script>
+
+    <!-- PDF SELECTION MODAL FOR EXPORT -->
+    <div id="pdfSelectionModal" class="modal-overlay" style="display: none; z-index: 10001;"
+        onclick="if(event.target === this) closePDFSelectionModal()">
+        <div class="modal-content"
+            style="max-width: 500px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+            <div style="padding: 1.5rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                <h3 style="margin: 0; font-size: 1.25rem;">📄 Configurar Reporte PDF</h3>
+                <p style="margin: 0.5rem 0 0; opacity: 0.9; font-size: 0.85rem;">Selecciona las gráficas a incluir</p>
+            </div>
+            <div style="padding: 1.5rem; max-height: 400px; overflow-y: auto;">
+                <div style="display: grid; gap: 0.75rem;">
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="imc" checked
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Distribución de IMC</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="genero" checked
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Distribución por Género</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="glucosa" checked
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Distribución de Glucosa</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="presion" checked
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Distribución de Presión Arterial</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="edades"
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Distribución por Edad</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="turnos"
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Distribución por Turno</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="plantas"
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Empleados por Planta</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="programas"
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Programas de Salud</span>
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="chartSelection" value="padecimientos"
+                            style="width: 18px; height: 18px; accent-color: #8b5cf6;">
+                        <span style="font-size: 0.95rem; color: #1e293b;">Top Padecimientos</span>
+                    </label>
+                </div>
+
+                <!-- Select All / None -->
+                <div
+                    style="display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                    <button type="button"
+                        onclick="document.querySelectorAll('input[name=chartSelection]').forEach(cb => cb.checked = true)"
+                        style="flex: 1; padding: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; color: #166534; cursor: pointer; font-size: 0.85rem;">
+                        ✓ Seleccionar Todas
+                    </button>
+                    <button type="button"
+                        onclick="document.querySelectorAll('input[name=chartSelection]').forEach(cb => cb.checked = false)"
+                        style="flex: 1; padding: 0.5rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; color: #991b1b; cursor: pointer; font-size: 0.85rem;">
+                        ✗ Deseleccionar Todas
+                    </button>
+                </div>
+            </div>
+            <div
+                style="padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 1rem;">
+                <button type="button" onclick="closePDFSelectionModal()" class="btn-prev"
+                    style="padding: 0.75rem 1.5rem;">Cancelar</button>
+                <button type="button" onclick="generatePDFReport()" class="btn-next"
+                    style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">Generar
+                    PDF</button>
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
+
+
+
+</html>

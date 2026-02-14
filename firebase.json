@@ -1,0 +1,19 @@
+{
+  "hosting": {
+    "target": "app",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "docs/**",
+      "src/server/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/src/client/index.html"
+      }
+    ]
+  }
+}

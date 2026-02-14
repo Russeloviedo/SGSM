@@ -1,0 +1,30 @@
+# Firebase
+.firebase/
+firebase-debug.log
+.firebaserc
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Gemini/AI artifacts
+.gemini/
+.agent/
+brain/
+
+# Local drafts/cache
+hunter_draft
+*.log
