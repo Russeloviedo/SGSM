@@ -334,9 +334,22 @@ function processForm(data) {
     if (headerName && map.hasOwnProperty(headerName)) {
        const colIndex = map[headerName];
        
-       // Si el usuario envió algo vacío, ponemos "N/A"
        let finalValue = value;
-       if (value === '' || value === null || value === undefined) {
+       
+       // 🛠️ FIX: Formatear JSON de Evaluación / Exploración a Texto Legible
+       if ((key === 'evaluacionData' || key === 'exploracionData') && value && value.startsWith('[')) {
+          try {
+             const items = JSON.parse(value);
+             if (Array.isArray(items) && items.length > 0) {
+                finalValue = items.map(i => `• ${i.item}: ${i.detalle}`).join('\n');
+             }
+          } catch(e) {
+             // Si falla, dejar valor original
+          }
+       }
+
+       // Si el usuario envió algo vacío, ponemos "N/A"
+       if (finalValue === '' || finalValue === null || finalValue === undefined) {
          finalValue = 'N/A';
        }
        
@@ -416,7 +429,7 @@ function processForm(data) {
          sheet.getRange(rowIndex, map['IMC'] + 1).setNumberFormat("0.0");
       }
 
-     // createDashboard(); // Desactivado para velocidad
+     createDashboard(); // ✅ REACTIVADO: Dashboard Inteligente con Nuevas Gráficas
      return { success: true, rowIndex: rowIndex };
   } else {
      // Create Block
@@ -433,7 +446,7 @@ function processForm(data) {
          sheet.getRange(newRow, map['IMC'] + 1).setNumberFormat("0.0");
       }
 
-     // createDashboard(); // Desactivado para velocidad
+     createDashboard(); // ✅ REACTIVADO: Dashboard Inteligente con Nuevas Gráficas
      return { success: true, rowIndex: newRow };
   }
 }
@@ -582,248 +595,195 @@ function getDashboardData() {
 /**
  * Crea o actualiza el Dashboard Nutricional "Premium".
  * Se ejecuta automáticamente al guardar nuevos datos.
+ * ⚡ OPTIMIZADO V6.2: Lógica "Smart Update" para evitar reconstrucción.
+ */
+/**
+ * Crea o actualiza el Dashboard Nutricional "Premium".
+ * Se ejecuta automáticamente al guardar nuevos datos.
+ * ⚡ OPTIMIZADO V6.5: Lógica "Smart Update" y Nuevas Gráficas Organizacionales.
  */
 function createDashboard() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const dataSheet = ss.getSheetByName('Registro');
   try {
-    if (!dataSheet || dataSheet.getLastRow() < 2) return; // No hay datos aún
+    if (!dataSheet || dataSheet.getLastRow() < 2) return; 
     
-    // 1. Crear Hoja de Cálculos Oculta (Para alimentar los gráficos)
     let calcSheet = ss.getSheetByName('Calculos_Aux');
     if (!calcSheet) {
       calcSheet = ss.insertSheet('Calculos_Aux');
-      calcSheet.hideSheet(); // Ocultar para que sea transparente al usuario
+      calcSheet.hideSheet();
     }
-    
-    // Limpiar cálculos previos para regenerar
     calcSheet.clear();
     
-    // --- A. PRE-PROCESAMIENTO DE DATOS (Fórmulas en Script) ---
-    const dataRange = dataSheet.getDataRange();
-    const values = dataRange.getValues();
-    const headers = values[0];
-    const data = values.slice(1);
+    // --- A. PROCESAMIENTO DE DATOS ---
+    const headers = dataSheet.getRange(1, 1, 1, dataSheet.getLastColumn()).getValues()[0];
+    const dataRowRange = dataSheet.getRange(2, 1, dataSheet.getLastRow() - 1, dataSheet.getLastColumn());
+    const data = dataRowRange.getValues();
     
-    // Índices de columnas (Dinámicos - Lectura directa de headers)
-    // Esto es compatible con V6 porque leemos lo que hay.
-    const iGenero = headers.indexOf('Género');
-    const iEdad = headers.indexOf('Edad');
-    const iSupervisor = headers.indexOf('Supervisor');
-    const iPlanta = headers.indexOf('Planta');
-    const iLinea = headers.indexOf('Área'); 
-    const iPuesto = headers.indexOf('Puesto');
-    const iTurno = headers.indexOf('Turno');
     const iIMC = headers.indexOf('IMC');
-    const iVisc = headers.indexOf('Grasa Visceral');
     const iTASis = headers.indexOf('TA Sistólica');
     const iTADias = headers.indexOf('TA Diastólica');
+    const iEdad = headers.indexOf('Edad');
     const iBodyAge = headers.indexOf('Body Age');
-    const iPadecimiento = headers.indexOf('Padecimiento');
-    const iMusc = headers.indexOf('% MUSC');
     const iFat = headers.indexOf('% FAT');
+    const iMusc = headers.indexOf('% MUSC');
+    const iPadecimiento = headers.indexOf('Padecimiento');
+    const iAptitud = headers.indexOf('Aptitud Médica');
+    const iUnidad = headers.indexOf('Unidad de Negocio');
+    const iArea = headers.indexOf('Área');
 
-    // Validación básica: Si faltan columnas críticas, abortar para evitar índices -1
-    
-    const processedData = [['ID', 'Score Salud', 'Clasif. IMC', 'Riesgo Cardio', 'Delta Edad', 'Tipo Físico', 'Riesgo Turno', 'Planta', 'Turno', 'Supervisor', 'IMC', 'TASis', 'TADias', 'Visceral']];
-    
+    // Hallazgos clínicos (Sistemas Paso 5)
+    const clinicalHeaders = [
+      'Exp. Cráneo', 'Exp. Cara', 'Exp. Cuello', 'Exp. Abdomen', 'Exp. MsTs', 'Exp. MsPs', 
+      'Exp. Articulaciones', 'Exp. Columna', 'Exp. Reflejos', 'Exp. Várices', 'Eval. Órganos', 
+      'Eval. Piel', 'Eval. Respiratorio', 'Eval. Cardio', 'Eval. Digestivo', 'Eval. Genitourinario'
+    ];
+    const clinicalIndices = clinicalHeaders.map(h => headers.indexOf(h)).filter(idx => idx > -1);
+
+    const processedData = [['ID', 'Score', 'IMC_Clasif', 'Cardio', 'Aptitud', 'Unidad', 'Area']];
+    const buRestrictions = {}; // Unidad -> Contador Restricciones
+    const fitnessCounts = { 'Apto': 0, 'Apto con Restr.': 0, 'No Apto': 0, 'N/A': 0 };
+    const systemAnomalies = {}; // Sistema -> Contador "Anormal"
+
     data.forEach((row, index) => {
       let score = 100;
       
-      // 1. Clasificación IMC
+      // 1. IMC & Cardio (Sigue lógica original)
       const imc = (iIMC > -1) ? (parseFloat(row[iIMC]) || 0) : 0;
-      let clasifIMC = 'Normal';
-      if (imc < 18.5) clasifIMC = 'Bajo Peso';
-      else if (imc >= 25 && imc < 30) { clasifIMC = 'Sobrepeso'; score -= 10; }
-      else if (imc >= 30 && imc < 35) { clasifIMC = 'Obesidad I'; score -= 20; }
-      else if (imc >= 35 && imc < 40) { clasifIMC = 'Obesidad II'; score -= 30; }
-      else if (imc >= 40) { clasifIMC = 'Obesidad III'; score -= 40; }
-      
-      // 2. Riesgo Cardio
+      let clasif = imc >= 30 ? 'Obesidad' : (imc >= 25 ? 'Sobrepeso' : 'Normal');
+      if (imc >= 30) score -= 20;
+
       const sis = (iTASis > -1) ? (parseInt(row[iTASis]) || 0) : 0;
       const dias = (iTADias > -1) ? (parseInt(row[iTADias]) || 0) : 0;
-      let riesgoCardio = 'Normal';
-      if (sis >= 140 || dias >= 90) { riesgoCardio = 'Hipertensión G2'; score -= 30; }
-      else if (sis >= 130 || dias >= 80) { riesgoCardio = 'Hipertensión G1'; score -= 15; }
-      else if (sis >= 120 && dias < 80) { riesgoCardio = 'Elevada'; score -= 5; }
-      
-      // 3. Delta Edad
-      const edad = (iEdad > -1) ? (parseInt(row[iEdad]) || 0) : 0;
-      const bodyAge = (iBodyAge > -1) ? (parseInt(row[iBodyAge]) || edad) : edad;
-      const deltaEdad = bodyAge - edad; // Positivo es malo (cuerpo más viejo)
-      if (deltaEdad > 0) score -= (deltaEdad * 1); // -1 pto por año extra
-      
-      // 4. Tipo Físico (Músculo vs Grasa) - Simplificado
-      const fat = (iFat > -1) ? (parseFloat(row[iFat]) || 0) : 0;
-      const musc = (iMusc > -1) ? (parseFloat(row[iMusc]) || 0) : 0;
-      let tipoFisico = 'Promedio';
-      if (musc > 35 && fat < 20) tipoFisico = 'Atlético';
-      if (musc < 28 && fat > 25) tipoFisico = 'Sarcopénico (Falso Delgado)'; 
-      
-      let padecimiento = (iPadecimiento > -1) ? row[iPadecimiento] : '';
-      if (padecimiento && padecimiento !== 'Ninguno') score -= 10;
-      if (score < 0) score = 0;
-      
-      // Datos crudos para el array
-      const turnoVal = (iTurno > -1) ? row[iTurno] : '';
-      const plantaVal = (iPlanta > -1) ? row[iPlanta] : '';
-      const supVal = (iSupervisor > -1) ? row[iSupervisor] : '';
-      const viscVal = (iVisc > -1) ? row[iVisc] : 0;
+      let cardio = (sis >= 140 || dias >= 90) ? 'Riesgo Alto' : 'Normal';
+      if (cardio === 'Riesgo Alto') score -= 30;
 
-      processedData.push([
-        `E-${index+1}`, 
-        score, 
-        clasifIMC, 
-        riesgoCardio, 
-        deltaEdad, 
-        tipoFisico, 
-        turnoVal === 'Nocturno' ? 'Nocturno' : 'Diurno',
-        plantaVal,
-        turnoVal,
-        supVal,
-        imc,
-        sis,
-        dias,
-        viscVal
-      ]);
+      // 2. Aptitud & Unidad (NUEVO)
+      const aptitud = (iAptitud > -1) ? String(row[iAptitud] || 'N/A') : 'N/A';
+      const unidad = (iUnidad > -1) ? String(row[iUnidad] || 'Sin Unidad') : 'Sin Unidad';
+      
+      // Contadores para gráficas
+      if (aptitud.includes('Restr')) {
+        buRestrictions[unidad] = (buRestrictions[unidad] || 0) + 1;
+        fitnessCounts['Apto con Restr.']++;
+      } else if (aptitud.includes('No Apto')) {
+        fitnessCounts['No Apto']++;
+      } else if (aptitud.includes('Apto')) {
+        fitnessCounts['Apto']++;
+      } else {
+        fitnessCounts['N/A']++;
+      }
+
+      // 3. Hallazgos Sistemas (NUEVO)
+      clinicalIndices.forEach(idx => {
+        const val = String(row[idx] || '').toLowerCase();
+        if (val.includes('anormal')) {
+          const sysName = headers[idx];
+          systemAnomalies[sysName] = (systemAnomalies[sysName] || 0) + 1;
+        }
+      });
+
+      processedData.push([`E-${index+1}`, score, clasif, cardio, aptitud, unidad, (iArea > -1 ? row[iArea] : '')]);
     });
-    
-    // Pegar datos procesados en Hoja Oculta
-    if (processedData.length > 0) {
-       calcSheet.getRange(1, 1, processedData.length, processedData[0].length).setValues(processedData);
-    }
-    
-    // --- B. CONSTRUCCIÓN DEL DASHBOARD VISUAL ---
-    let dashSheet = ss.getSheetByName('Dashboard');
-    if (!dashSheet) dashSheet = ss.insertSheet('Dashboard');
-    dashSheet.clear(); 
-    
-    // Estilos Generales ("Premium Look")
-    dashSheet.setHiddenGridlines(true);
-    // dashSheet.getRange('A:Z').setBackground('#f8fafc'); 
-    
-    // Ajustar anchos
-    dashSheet.setColumnWidth(1, 25);
-    dashSheet.setColumnWidth(2, 200);
-    dashSheet.setColumnWidth(3, 25);
-    dashSheet.setColumnWidth(4, 25);
-    dashSheet.setColumnWidth(5, 200);
-    dashSheet.setColumnWidth(6, 25);
-    dashSheet.setColumnWidth(7, 25);
-    dashSheet.setColumnWidth(8, 200);
-    dashSheet.setColumnWidth(9, 25);
-    dashSheet.setColumnWidth(10, 25);
-    dashSheet.setColumnWidth(11, 200);
 
-    // Header
+    // --- B. TABLAS DE AGREGACIÓN EN CALCULOS_AUX ---
+    
+    // Tabla 1: Restricciones por Unidad
+    const buTable = [['Unidad de Negocio', 'Restricciones']];
+    Object.entries(buRestrictions).forEach(([k, v]) => buTable.push([k, v]));
+    calcSheet.getRange(1, 1, buTable.length, 2).setValues(buTable);
+
+    // Tabla 2: Aptitud General
+    const fitTable = [['Estado', 'Cantidad']];
+    Object.entries(fitnessCounts).forEach(([k, v]) => fitTable.push([k, v]));
+    calcSheet.getRange(1, 4, fitTable.length, 2).setValues(fitTable);
+
+    // Tabla 3: Hallazgos por Sistema
+    const sysTable = [['Sistema', 'Hallazgos Anormales']];
+    Object.entries(systemAnomalies).sort((a,b) => b[1]-a[1]).slice(0, 8).forEach(([k, v]) => sysTable.push([k, v]));
+    calcSheet.getRange(1, 7, sysTable.length, 2).setValues(sysTable);
+
+    // --- C. DASHBOARD VISUAL ---
+    let dashSheet = ss.getSheetByName('Dashboard');
+    let isUpdateMode = false;
+
+    if (dashSheet) {
+      const check = dashSheet.getRange('B2').getValue();
+      const version = dashSheet.getRange('M32').getValue();
+      // Si el título coincide Y la versión es la actual, entramos en modo rápido
+      if (check === 'Dashboard Nutricional - Vista Ejecutiva' && version === 'V6.5') {
+        isUpdateMode = true;
+      } else {
+        dashSheet.clear(); // Si la versión es vieja o no existe, borrar para reconstruir con nuevas gráficas
+      }
+    } else {
+      dashSheet = ss.insertSheet('Dashboard');
+    }
+
+    const totalEval = data.length;
+    const avgScore = (processedData.slice(1).reduce((s, r) => s + r[1], 0) / totalEval).toFixed(0);
+
+    if (isUpdateMode) {
+       dashSheet.getRange('B6').setValue(totalEval);
+       dashSheet.getRange('E6').setValue(avgScore);
+       dashSheet.getRange('B32').setValue("Actualización Automática: " + new Date().toLocaleString());
+       return; // Los gráficos se refrescan solos
+    }
+
+    // MODO CONSTRUCCIÓN (Primera vez)
+    dashSheet.setHiddenGridlines(true);
+    [1,3,4,6,7,9,10,12].forEach(c => dashSheet.setColumnWidth(c, 25));
+    [2,5,8,11].forEach(c => dashSheet.setColumnWidth(c, 200));
+
     dashSheet.getRange('B2:M3').merge().setValue('Dashboard Nutricional - Vista Ejecutiva')
       .setHorizontalAlignment('center').setVerticalAlignment('middle')
       .setFontFamily('Montserrat').setFontSize(20).setFontWeight('bold')
       .setBackground('#0f172a').setFontColor('#ffffff');
-      
-    // --- KPIS ---
-    const kpiRow = 5;
-    const totalEval = data.length;
-    let avgScore = 0;
-    if (processedData.length > 1) {
-        avgScore = processedData.slice(1).reduce((sum, r) => sum + r[1], 0) / totalEval;
-    }
-    const highRiskCount = processedData.slice(1).filter(r => r[3].includes('Hipertensión')).length;
-    
-    createKpiCard(dashSheet, 'B', kpiRow, 'Total Evaluados', totalEval, '#3b82f6');
-    createKpiCard(dashSheet, 'E', kpiRow, 'Score Salud', avgScore.toFixed(0), avgScore > 80 ? '#10b981' : '#ef4444');
-    createKpiCard(dashSheet, 'H', kpiRow, 'Hipertensión', highRiskCount, '#f59e0b');
-    createKpiCard(dashSheet, 'K', kpiRow, 'Obesidad', processedData.slice(1).filter(r => r[2].includes('Ob')).length, '#ef4444');
 
-    // --- GRÁFICOS ---
+    createKpiCard(dashSheet, 'B', 5, 'Evaluaciones', totalEval, '#3b82f6');
+    createKpiCard(dashSheet, 'E', 5, 'Score Salud', avgScore, '#10b981');
+
+    // --- GRÁFICAS ---
     
-    // 1. Distribución IMC
-    const imcCounts = {};
-    processedData.slice(1).forEach(r => imcCounts[r[2]] = (imcCounts[r[2]] || 0) + 1);
-    const imcTable = [['Categoría IMC', 'Cantidad']];
-    for (let k in imcCounts) imcTable.push([k, imcCounts[k]]);
-    calcSheet.getRange(1, 16, 1, 2).setValues([['Resumen IMC', '']]); 
-    const countImcRows = imcTable.length;
-    calcSheet.getRange(2, 16, countImcRows, 2).setValues(imcTable);
-    
-    const chartIMC = dashSheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(calcSheet.getRange(2, 16, countImcRows, 2))
+    // 1. Restricciones por Unidad (Barras)
+    const chartBU = dashSheet.newChart()
+      .setChartType(Charts.ChartType.BAR)
+      .addRange(calcSheet.getRange(1, 1, buTable.length, 2))
       .setPosition(10, 2, 0, 0)
-      .setOption('title', 'Distribución de Peso (IMC)')
-      .setOption('pieHole', 0.5)
-      .setOption('backgroundColor', '#f8fafc')
-      .setOption('width', 400)
-      .setOption('height', 300)
+      .setOption('title', 'Restricciones por Unidad de Negocio')
+      .setOption('colors', ['#ef4444'])
+      .setOption('legend', {position: 'none'})
+      .setOption('width', 400).setOption('height', 300)
       .build();
-    dashSheet.insertChart(chartIMC);
-    
-    // 2. Dispersión
-    const chartScatter = dashSheet.newChart()
-      .setChartType(Charts.ChartType.SCATTER)
-      .addRange(calcSheet.getRange(1, 11, processedData.length, 1))
-      .addRange(calcSheet.getRange(1, 14, processedData.length, 1))
+    dashSheet.insertChart(chartBU);
+
+    // 2. Aptitud General (Dona)
+    const chartFit = dashSheet.newChart()
+      .setChartType(Charts.ChartType.PIE)
+      .addRange(calcSheet.getRange(1, 4, fitTable.length, 2))
       .setPosition(10, 8, 0, 0)
-      .setOption('title', 'Riesgo Metabólico: IMC vs Grasa Visceral')
-      .setOption('hAxis.title', 'IMC')
-      .setOption('vAxis.title', 'Grasa Visceral')
-      .setOption('backgroundColor', '#f8fafc')
-      .setOption('width', 400)
-      .setOption('height', 300)
+      .setOption('title', 'Estado de Aptitud Médica')
+      .setOption('pieHole', 0.5)
+      .setOption('colors', ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'])
+      .setOption('width', 400).setOption('height', 300)
       .build();
-    dashSheet.insertChart(chartScatter);
+    dashSheet.insertChart(chartFit);
 
-    // 3. Top Riesgo Supervisor
-    const riskBySup = {};
-    processedData.slice(1).forEach(r => {
-      let sup = r[9]; 
-      let isRisk = r[2].includes('Obesidad') || r[3].includes('Hiper');
-      if (isRisk) riskBySup[sup] = (riskBySup[sup] || 0) + 1;
-    });
-    const supTable = [['Supervisor', 'Personal en Riesgo']];
-    for (let k in riskBySup) supTable.push([k, riskBySup[k]]);
-    
-    if (supTable.length > 1) {
-      calcSheet.getRange(2, 24, supTable.length, 2).setValues(supTable);
-      const chartSup = dashSheet.newChart()
-        .setChartType(Charts.ChartType.BAR)
-        .addRange(calcSheet.getRange(2, 24, supTable.length, 2))
-        .setPosition(27, 2, 0, 0)
-        .setOption('title', 'Supervisores con equipos en Riesgo')
-        .setOption('legend', {position: 'none'})
-        .setOption('colors', ['#ef4444'])
-        .setOption('backgroundColor', '#f8fafc')
-        .setOption('width', 400)
-        .setOption('height', 300)
-        .build();
-      dashSheet.insertChart(chartSup);
-    }
-    
-    // 4. Semáforo Cardio
-    const cardioCounts = {};
-    processedData.slice(1).forEach(r => cardioCounts[r[3]] = (cardioCounts[r[3]] || 0) + 1);
-    const cardioTable = [['Estado Cardio', 'Personas']];
-    for (let k in cardioCounts) cardioTable.push([k, cardioCounts[k]]);
-    calcSheet.getRange(2, 27, cardioTable.length, 2).setValues(cardioTable);
-    
-    const chartCardio = dashSheet.newChart()
+    // 3. Sistemas con más Hallazgos (Barras)
+    const chartSys = dashSheet.newChart()
       .setChartType(Charts.ChartType.COLUMN)
-      .addRange(calcSheet.getRange(2, 27, cardioTable.length, 2))
-      .setPosition(27, 8, 0, 0)
-      .setOption('title', 'Salud Cardiovascular (Hipertensión)')
-      .setOption('colors', ['#f59e0b'])
-      .setOption('backgroundColor', '#f8fafc')
-      .setOption('width', 400)
-      .setOption('height', 300)
+      .addRange(calcSheet.getRange(1, 7, sysTable.length, 2))
+      .setPosition(27, 2, 0, 0)
+      .setOption('title', 'Top Hallazgos Clínicos (Paso 5)')
+      .setOption('colors', ['#6366f1'])
+      .setOption('legend', {position: 'none'})
+      .setOption('width', 850).setOption('height', 300)
       .build();
-    dashSheet.insertChart(chartCardio);
+    dashSheet.insertChart(chartSys);
 
-    dashSheet.getRange('B32').setValue("Dashboard generado automáticamente el: " + new Date().toLocaleString());
-  
-  } catch(e) {
-    // Error silencioso en Dashboard para no detener el guardado
-    // logToDebug("Error creando Dashboard: " + e.toString());
-  }
+    dashSheet.getRange('B32').setValue("Dashboard configurado el: " + new Date().toLocaleString());
+    dashSheet.getRange('M32').setValue("V6.5");
+  } catch(e) { /* Silencioso en guardado */ }
 }
 
 /**
