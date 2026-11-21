@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/src/client/manifest.json">
+    <title>Actividades restringidas</title>
+    <link rel="icon" type="image/png" href="/assets/branding/logo-nuevo.png">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-nuevo.png">
+    
+    <!-- Meta tags for Mobile Web App look -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EHS Hunter">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --primary: #000000;
+            --accent: #0b4f35;
+            --accent-glow: rgba(11, 79, 53, 0.1);
+            --bg-page: #f1f5f9;
+            --card-white: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --status-on: #10b981;
+            --status-off: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-page);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(11, 79, 53, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(203, 213, 225, 0.2) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Subirlo arriba */
+            padding: 1rem;
+            padding-top: 1.5rem; /* Margen superior controlado */
+            overflow-x: hidden;
+            overflow-y: auto; /* Permitir scroll si es necesario */
+            color: var(--text-main);
+        }
+
+        .scene {
+            width: 100%;
+            max-width: 400px;
+            perspective: 1500px;
+        }
+
+        /* Views */
+        .view { display: none; width: 100%; animation: panelSlideIn 0.5s ease-out forwards; }
+        .view.active { display: block; }
+
+        @keyframes panelSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- SEARCH SCREEN (with Numeric Keypad) --- */
+        .search-container {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 1px solid var(--border);
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        .search-container h1 { font-size: 1.4rem; font-weight: 800; color: var(--accent); margin-bottom: 0.5rem; }
+
+        .search-logo-container {
+            width: 85px;
+            height: 85px;
+            margin: 0 auto 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        /* PIN Display Area */
+        .pin-display {
+            background: #f8fafc;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            position: relative;
+        }
+
+        .pin-display:empty::before {
+            content: 'NÚMERO EMPLEADO';
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        /* Keypad Grid */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .key {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            height: 54px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .key:active {
+            transform: scale(0.9);
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .key.special {
+            color: #94a3b8;
+            background: #f1f5f9;
+        }
+
+        .key.special:active {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-consult {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+            box-shadow: 0 8px 16px rgba(11, 79, 53, 0.15);
+        }
+
+        .btn-consult:hover { background: #065f46; transform: translateY(-2px); box-shadow: 0 15px 30px rgba(11, 79, 53, 0.3); }
+        .btn-consult:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; pointer-events: none; }
+
+        /* --- 3D ID BADGE CARD --- */
+        .card {
+            width: 320px;
+            height: 540px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .card.is-flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column;
+            border: 1px solid #d1d5db;
+            overflow: hidden;
+        }
+
+        .card-face-back { transform: rotateY(180deg); }
+
+        /* -- FRONT: REAL BADGE LOOK -- */
+        .badge-header { padding: 1.5rem 0.5rem; text-align: center; }
+        .hunter-logo { font-family: Arial, Helvetica, sans-serif; font-size: 2.8rem; font-weight: 900; color: #000000; line-height: 1; margin-bottom: 0.2rem; letter-spacing: -2px; }
+        .hunter-tagline { font-size: 0.65rem; color: #333; font-weight: 600; margin-top: 0.4rem; }
+
+        .photo-area {
+            width: 140px; height: 160px; margin: 1rem auto; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+
+        .photo-img { width: 100%; height: 100%; object-fit: cover; background: #f1f5f9; color: #cbd5e1; display: flex; align-items: center; justify-content: center; }
+
+        .name-area { padding: 0.5rem; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .name-primary { font-family: 'Crimson Pro', serif; font-size: 2.1rem; font-weight: 600; color: #000000; line-height: 1.1; margin-bottom: 0.4rem; }
+        .name-secondary { font-family: 'Crimson Pro', serif; font-size: 1.6rem; font-weight: 400; color: #333333; line-height: 1.1; }
+
+        .employee-num-large { padding: 1rem 0 2rem; text-align: center; font-size: 3.2rem; font-weight: 800; color: #000000; letter-spacing: 2px; }
+
+        /* -- BACK: RESTRICTIONS -- */
+        .back-header { padding: 1.25rem 1.5rem; border-bottom: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        .back-header h3 { font-size: 0.8rem; font-weight: 800; color: var(--accent); letter-spacing: 0.1em; }
+        .back-content { padding: 1.25rem 1.5rem; flex-grow: 1; font-size: 0.85rem; }
+        .data-item { margin-bottom: 1rem; }
+        .data-item label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.2rem; }
+        .data-item p { font-size: 1.1rem; font-weight: 500; color: #1e293b; }
+
+        .restrictions-box { margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .restrictions-box label { font-size: 0.8rem; font-weight: 800; color: var(--accent); margin-bottom: 0.5rem; display: block; }
+        .restrictions-list { display: flex; flex-direction: column; gap: 0.4rem; list-style: none; }
+        .restrictions-list li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+        .barcode-area { padding: 1.5rem; text-align: center; background: white; border-top: 1px solid #e2e8f0; }
+        .barcode-img { width: 100%; height: 50px; background: #000; display: flex; align-items: center; justify-content: center; }
+        .barcode-numbers { font-family: monospace; font-size: 0.75rem; color: #333; margin-top: 5px; }
+        .address-text { font-size: 0.6rem; color: #64748b; text-align: center; padding: 0 1rem 1rem; line-height: 1.3; }
+
+        /* Controls */
+        .controls { margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; }
+        .btn-action { background: white; border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-action:hover { border-color: var(--accent); color: var(--accent); background: #f0fdf4; }
+
+        /* Loading */
+        .loading-sc { display: none; margin-top: 2rem; color: var(--accent); font-weight: 700; text-align: center; font-size: 1.1rem; }
+        .loading-sc i { animation: spin 1s linear infinite; display: inline-block; margin-bottom: 0.5rem; font-size: 1.5rem; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;">
+        <div style="background: white; padding: 2rem; border-radius: 20px; text-align: center; max-width: 360px; width: 90%; color: var(--text-main); box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--border);">
+            <div class="search-logo-container" style="margin-bottom: 0.5rem; width: 60px; height: 60px;">
+                <img src="/assets/branding/ehs-logo.png" alt="EHS Hunter Logo">
+            </div>
+            <h2 style="margin-top: 0; font-weight: 800; font-size: 1.4rem; color: var(--accent);">Acceso Supervisores</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.85rem; font-weight: 500;">Inicie sesión para consultar restricciones</p>
+
+            <form id="customLoginForm" style="text-align: left; margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;">Usuario o ID</label>
+                    <input type="text" id="loginUser" placeholder="Usuario" required style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.95rem; font-family: inherit; font-weight: 500; outline: none; transition: border-color 0.2s;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;">Contraseña</label>
+                    <div style="position: relative;">
+                        <input type="password" id="loginPass" placeholder="••••••" required style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.95rem; font-family: inherit; font-weight: 500; outline: none; transition: border-color 0.2s; padding-right: 40px;">
+                        <button type="button" onclick="togglePasswordVisibility('loginPass', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0;">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="loginSubmitBtn" style="background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.2s; box-shadow: 0 4px 10px rgba(11, 79, 53, 0.2);">
+                    Autorizar Acceso
+                </button>
+                <div style="text-align: center; margin-top: 1.25rem;">
+                    <a href="#" onclick="openResetPasswordModal(event)" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; font-weight: 600; border-bottom: 1px dotted var(--text-muted);">¿Olvidaste tu contraseña?</a>
+                </div>
+            </form>
+            <p id="loginError" style="color: #ef4444; font-size: 0.85rem; margin-top: 1rem; display: none; background: #fee2e2; padding: 8px; border-radius: 8px; border: 1px solid #fecaca; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <!-- RESET PASSWORD MODAL -->
+    <div id="resetPasswordModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 10000; justify-content: center; align-items: center;" onclick="if(event.target === this) closeResetPasswordModal()">
+        <div style="background: white; border-radius: 20px; width: 90%; max-width: 400px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+            <h3 style="margin-top: 0; color: var(--text-main); font-weight: 800;">Restablecer Contraseña</h3>
+            <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">Ingresa tu usuario o email. Te enviaremos una clave temporal.</p>
+            <input type="text" id="resetInput" placeholder="Usuario o Email" style="width: 100%; padding: 10px; margin-bottom: 1.5rem; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 500;">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeResetPasswordModal()" style="flex: 1; padding: 10px; border: 2px solid var(--border); background: white; border-radius: 10px; font-weight: 700; color: var(--text-muted); cursor: pointer;">Cancelar</button>
+                <button id="btnResetSend" onclick="handleResetPassword()" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">Enviar Correo</button>
+            </div>
+            <p id="resetMsg" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div id="changePasswordModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 20px; width: 90%; max-width: 400px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+            <h3 style="margin-top: 0; color: var(--text-main); font-weight: 800;">Actualizar Seguridad</h3>
+            <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: #ef4444; font-weight: 600;">Por seguridad, debes cambiar tu contraseña inicial o temporal antes de continuar.</p>
+            
+            <div style="margin-bottom: 1rem;">
+                <input type="password" id="chgOldPass" placeholder="Contraseña Actual" style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 500;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <input type="password" id="chgNewPass1" placeholder="Nueva Contraseña" style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 500;">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <input type="password" id="chgNewPass2" placeholder="Confirmar Nueva" style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 500;">
+            </div>
+            
+            <button id="btnChangePass" onclick="handleChangePassword()" style="width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">Actualizar Contraseña</button>
+            <p id="chgMsg" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; color: #ef4444; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <!-- ERROR MODAL -->
+    <div id="errorModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 10001; justify-content: center; align-items: center;" onclick="if(event.target === this) closeErrorModal()">
+        <div style="background: white; border-radius: 20px; width: 90%; max-width: 380px; padding: 2.5rem 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; border: 1px solid #fee2e2;">
+            <div style="background: #fef2f2; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; border: 2px solid #fee2e2;">
+                <i data-lucide="user-x" style="width: 35px; height: 35px; color: #ef4444;"></i>
+            </div>
+            <h3 style="margin-top: 0; color: #1e293b; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.75rem;">Empleado no encontrado</h3>
+            <p id="errorModalText" style="margin-bottom: 2rem; font-size: 0.95rem; color: #64748b; line-height: 1.5;">El empleado no se encuentra en la base de datos.</p>
+            <button onclick="closeErrorModal()" style="width: 100%; padding: 12px; background: #1e293b; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Navigation/Logout header (HIDDEN BY DEFAULT) -->
+    <div id="topNavControls" style="display: none; position: absolute; top: 1rem; right: 1rem; z-index: 500; gap: 10px;">
+        <button onclick="logout()" style="background: white; border: 1px solid var(--border); color: var(--text-muted); padding: 8px 12px; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.2s;">
+            <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Salir
+        </button>
+    </div>
+
+    <!-- MAIN PLATFORM STRUCTURE (HIDDEN BY DEFAULT) -->
+    <div id="mainPlatformScene" class="scene" style="display: none;">
+        
+        <!-- Vista 1: Entrada (Numeric Keypad) -->
+        <div id="viewSearch" class="view active">
+            <div class="search-container">
+                <div class="search-logo-container">
+                    <img src="/assets/branding/ehs-logo.png" alt="EHS Hunter Logo">
+                </div>
+                <h1>Portal Supervisor</h1>
+                
+                <div id="pinDisplay" class="pin-display"></div>
+                
+                <div class="keypad">
+                    <div class="key" onclick="pressKey('1')">1</div>
+                    <div class="key" onclick="pressKey('2')">2</div>
+                    <div class="key" onclick="pressKey('3')">3</div>
+                    <div class="key" onclick="pressKey('4')">4</div>
+                    <div class="key" onclick="pressKey('5')">5</div>
+                    <div class="key" onclick="pressKey('6')">6</div>
+                    <div class="key" onclick="pressKey('7')">7</div>
+                    <div class="key" onclick="pressKey('8')">8</div>
+                    <div class="key" onclick="pressKey('9')">9</div>
+                    <div class="key special" onclick="clearAll()">C</div>
+                    <div class="key" onclick="pressKey('0')">0</div>
+                    <div class="key special" onclick="backspace()"><i data-lucide="delete"></i></div>
+                </div>
+                
+                <button id="btnConsult" class="btn-consult" onclick="handleSearch()" disabled>
+                    Consultar Credencial
+                    <i data-lucide="shield-check"></i>
+                </button>
+
+                <div id="loadingMsg" class="loading-sc">
+                    <i data-lucide="refresh-cw"></i><br>
+                    AUTENTICANDO...
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista 2: Gafete 3D -->
+        <div id="viewID" class="view">
+            <div class="card" id="flipCard" onclick="this.classList.toggle('is-flipped')">
+                
+                <!-- GAFETE FRONT -->
+                <div class="card-face card-face-front">
+                    <div class="badge-header">
+                        <div class="hunter-logo">Hunter</div>
+                        <div class="hunter-tagline">Industrias Hunter, S. de R.L. de C.V.</div>
+                    </div>
+                    
+                    <div class="photo-area">
+                        <div class="photo-img">
+                            <i data-lucide="user" style="width:100px; height:100px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="name-area">
+                        <div class="name-primary" id="dispNameFirst">Nombre</div>
+                        <div class="name-secondary" id="dispNameLast">Apellido</div>
+                    </div>
+
+                    <!-- Info Grid: Supervisor & Unidad de Negocio -->
+                    <div style="padding: 0 1.25rem; margin-top: 0.25rem;">
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                            <i data-lucide="shield" style="width: 13px; height: 13px; color: var(--accent); flex-shrink: 0;"></i>
+                            <span style="font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Supervisor:</span>
+                            <span id="dispSupervisor" style="font-size: 0.75rem; font-weight: 600; color: #334155;">—</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="building-2" style="width: 13px; height: 13px; color: var(--accent); flex-shrink: 0;"></i>
+                            <span style="font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Unidad de Negocio:</span>
+                            <span id="dispUnidad" style="font-size: 0.75rem; font-weight: 600; color: #334155;">—</span>
+                        </div>
+                    </div>
+
+                    <div class="employee-num-large" id="dispIdLarge">00000</div>
+                </div>
+
+                <!-- GAFETE BACK -->
+                <div class="card-face card-face-back">
+                    <div class="back-header">
+                        <h3>ESTATUS EHS</h3>
+                        <div id="highStatus" style="font-size: 0.8rem; font-weight: 800; background: #fee2e2; color: #dc2626; padding: 0.4rem 0.8rem; border-radius: 6px;">RESTRICCIÓN ACTIVA</div>
+                    </div>
+
+                    <div class="back-content">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="data-item">
+                                <label>Motivo</label>
+                                <p id="dispMotiv">Hernia Discal</p>
+                            </div>
+                            <div class="data-item">
+                                <label>Región Afectada</label>
+                                <p id="dispReg">Lumbosacra</p>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="data-item">
+                                <label>Tipo de Restricción</label>
+                                <p id="dispType" style="font-weight: 700;">Permanente</p>
+                            </div>
+                            <div class="data-item">
+                                <label>Vigente hasta</label>
+                                <p id="dispFecha">Indefinido</p>
+                                <p id="dispAlertRevision" style="display:none; color: #dc2626; font-size: 0.70rem; font-weight: 800; margin-top: 4px; line-height: 1.2;"><i data-lucide="alert-circle" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;"></i>EMPLEADO REQUIERE REVISIÓN MÉDICA</p>
+                            </div>
+                        </div>
+
+                        <div class="restrictions-box">
+                            <label>Actividades no permitidas:</label>
+                            <ul class="restrictions-list" id="restrList">
+                                <li><div class="dot"></div> No levantamiento de cargas</li>
+                                <li><div class="dot"></div> No posturas forzadas</li>
+                                <li><div class="dot"></div> Uso de faja abdominal</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="barcode-area">
+                        <div class="barcode-img">
+                            <div style="background:white; width:95%; height:90%; display:flex; gap:4px; padding: 10px;">
+                                <div style="background:black; width:3px;"></div>
+                                <div style="background:black; width:5px;"></div>
+                                <div style="background:black; width:1px;"></div>
+                                <div style="background:black; width:4px;"></div>
+                                <div style="background:black; width:2px;"></div>
+                                <div style="background:black; width:1px;"></div>
+                                <div style="background:black; width:6px;"></div>
+                            </div>
+                        </div>
+                        <div class="barcode-numbers" id="dispBarcode">ID-000000000</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="controls">
+                <button class="btn-action" onclick="reset()">
+                    <i data-lucide="rotate-ccw"></i> Regresar
+                </button>
+                <button class="btn-action" onclick="document.getElementById('flipCard').classList.toggle('is-flipped')">
+                    <i data-lucide="refresh-cw"></i> Voltear Tarjeta
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/src/client/js/config.js"></script>
+    <script src="/src/client/js/supervisores.js?v=1.1"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

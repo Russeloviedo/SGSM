@@ -28,3 +28,6 @@ brain/
 # Local drafts/cache
 hunter_draft
 *.log
+projects.txt
+tmp_mapping.txt
+code.gs*.txt

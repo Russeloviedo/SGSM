@@ -56,6 +56,9 @@ if (loginForm) {
         try {
             const passHash = await sha256(pass);
 
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const storage = isMobile ? localStorage : sessionStorage;
+
             const response = await fetch(CONFIG.API_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'login', user: user, passHash: passHash }),
@@ -65,8 +68,14 @@ if (loginForm) {
             const result = await response.json();
 
             if (result.success) {
-                sessionStorage.setItem('sessionToken', result.token);
-                sessionStorage.setItem('currentUser', user);
+                // BLOCK SUPERVISORS FROM THE MAIN APP (Case-insensitive check)
+                const role = (result.role || '').trim().toLowerCase();
+                if (role === 'supervisor') {
+                    throw new Error("Acceso Denegado: Esta cuenta solo está autorizada para el Portal de Supervisores.");
+                }
+
+                storage.setItem('sessionToken', result.token);
+                storage.setItem('currentUser', user);
 
                 // Show the liquid loader overlay
                 const loaderOverlay = document.getElementById('dashboardLoaderOverlay');
@@ -161,7 +170,8 @@ async function handleChangePassword() {
     const new2 = document.getElementById('chgNewPass2').value.trim();
     const msg = document.getElementById('chgMsg');
     const btn = document.getElementById('btnChangePass');
-    const user = sessionStorage.getItem('currentUser');
+    const storage = sessionStorage.getItem('sessionToken') ? sessionStorage : localStorage;
+    const user = storage.getItem('currentUser');
 
     if (!oldPass || !new1 || !new2) {
         msg.textContent = "Todos los campos son obligatorios.";
@@ -244,6 +254,8 @@ function confirmPassword() {
 function logout() {
     if (confirm("¿Seguro que deseas cerrar sesión?")) {
         sessionStorage.clear();
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('currentUser');
         localStorage.removeItem('hunter_draft'); // Clear persistence draft on intentional logout
         window.location.reload();
     }
@@ -251,7 +263,7 @@ function logout() {
 
 // 5. Session Persistence Check
 function checkSession() {
-    const token = sessionStorage.getItem('sessionToken');
+    const token = sessionStorage.getItem('sessionToken') || localStorage.getItem('sessionToken');
     if (token) {
         document.getElementById('loginOverlay').style.display = 'none';
         console.log("✅ Sesión restaurada.");

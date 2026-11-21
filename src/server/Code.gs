@@ -10,6 +10,7 @@
 const FIELD_MAP = {
   // Metadatos
   'timestamp': 'Fecha Registro',
+  'fecha_actualizacion': 'Última Actualización', // <-- NUEVO CAMPO AÑADIDO
   
   // Datos Personales
   'programasList': 'Programas',
@@ -34,6 +35,53 @@ const FIELD_MAP = {
   'fechaIngresoEmpresa': 'Fecha Ingreso Empresa',
   'antiguedadEmpresa': 'Antigüedad Empresa',
   'funcionesPuesto': 'Funciones Puesto',
+
+  // Historia Ocupacional
+  'historial_empresa_1': 'Historial Empresa 1',
+  'historial_ocupacion_1': 'Historial Ocupación 1',
+  'historial_tiempo_1': 'Historial Tiempo 1',
+  'expo_quimicos_1': 'Exposicion quimico 1',
+  'expo_quimicos_1_detalle': 'Exposicion quimico detalle 1',
+  'expo_fisicos_1': 'Exposicion Fisicos 1',
+  'expo_fisicos_1_detalle': 'Exposicion Fisico Dtalle 1',
+  'expo_carga_fisica_1': 'Exposicion Carga fisica 1',
+  'expo_carga_fisica_1_detalle': 'Exposicion Carga fisica detalle 1',
+  'expo_ergonomicos_1': 'Exposicion Ergonomico 1',
+  'expo_ergonomicos_1_detalle': 'Exposicion Ergonomico detalle 1',
+  'expo_epp_1': 'Exposicion EPP 1',
+  'expo_epp_1_detalle': 'Exposicion EPP detalle 1',
+
+  'historial_empresa_2': 'Historial Empresa 2',
+  'historial_ocupacion_2': 'Historial Ocupación 2',
+  'historial_tiempo_2': 'Historial Tiempo 2',
+  'expo_quimicos_2': 'Exposicion quimico 2',
+  'expo_quimicos_2_detalle': 'Exposicion quimico detalle 2',
+  'expo_fisicos_2': 'Exposicion Fisicos 2',
+  'expo_fisicos_2_detalle': 'Exposicion Fisico Dtalle 2',
+  'expo_carga_fisica_2': 'Exposicion Carga fisica 2',
+  'expo_carga_fisica_2_detalle': 'Exposicion Carga fisica detalle 2',
+  'expo_ergonomicos_2': 'Exposicion Ergonomico 2',
+  'expo_ergonomicos_2_detalle': 'Exposicion Ergonomico detalle 2',
+  'expo_epp_2': 'Exposicion EPP 2',
+  'expo_epp_2_detalle': 'Exposicion EPP detalle 2',
+
+  'historial_empresa_3': 'Historial Empresa 3',
+  'historial_ocupacion_3': 'Historial Ocupación 3',
+  'historial_tiempo_3': 'Historial Tiempo 3',
+  'expo_quimicos_3': 'Exposicion quimico 3',
+  'expo_quimicos_3_detalle': 'Exposicion quimico detalle 3',
+  'expo_fisicos_3': 'Exposicion Fisicos 3',
+  'expo_fisicos_3_detalle': 'Exposicion Fisico Dtalle 3',
+  'expo_carga_fisica_3': 'Exposicion Carga fisica 3',
+  'expo_carga_fisica_3_detalle': 'Exposicion Carga fisica detalle 3',
+  'expo_ergonomicos_3': 'Exposicion Ergonomico 3',
+  'expo_ergonomicos_3_detalle': 'Exposicion Ergonomico detalle 3',
+  'expo_epp_3': 'Exposicion EPP 3',
+  'expo_epp_3_detalle': 'Exposicion EPP detalle 3',
+
+  // EPP (Equipo de Protección Personal)
+  'epp_lista': 'EPP Lista',
+  'epp_otros': 'EPP Otros Detalle',
 
   // Biometría
   'peso': 'Peso',
@@ -64,12 +112,20 @@ const FIELD_MAP = {
   'ahf_diabetes': 'AHF Diabetes',
   'ahf_hipertension': 'AHF Hipertensión',
   'ahf_cancer': 'AHF Cáncer',
-  'ahf_cardiopatias': 'AHF Cardiopatías',
+  'ahf_cardiopatias': 'AHF Cardiopatias',
+  'ahf_psiquiatricos': 'AHF Psiquiátricos',
+  'ahf_epilepticos': 'AHF Epilépticos',
+  'ahf_alergias': 'AHF Alergias',
+  'ahf_asma': 'AHF Asma',
   'ahf_otros': 'AHF Otros',
   'ahf_diabetes_detalle': 'AHF Diabetes Detalle',
   'ahf_hipertension_detalle': 'AHF Hipertensión Detalle',
   'ahf_cancer_detalle': 'AHF Cáncer Detalle',
-  'ahf_cardiopatias_detalle': 'AHF Cardiopatías Detalle',
+  'ahf_cardiopatias_detalle': 'AHF Cardiopatias Detalle',
+  'ahf_psiquiatricos_detalle': 'AHF Psiquiátricos Detalle',
+  'ahf_epilepticos_detalle': 'AHF Epilépticos Detalle',
+  'ahf_alergias_detalle': 'AHF Alergias Detalle',
+  'ahf_asma_detalle': 'AHF Asma Detalle',
   
   'habito_Alcohol_Tipo': 'Alcohol Tipo',
   'habito_Alcohol_Cantidad': 'Alcohol Cantidad',
@@ -104,7 +160,18 @@ const FIELD_MAP = {
   'gineco_papanicolau': 'Papanicolau',
   'gineco_mastografia': 'Mastografía',
 
-  // Evaluación Médica / Exploración (Unified V6.1)
+  // Actividades Adicionales (Paso 5)
+  'oficio_externo': '¿Qué oficio realiza o alguna otra actividad fuera de la empresa?',
+  'ortopedico': '¿Utiliza algún aparato ortopédico?',
+  'lateralidad': 'Lateralidad',
+  'deporte': '¿Practica deporte?',
+  'deporte_actividad': 'Deporte o Actividad fisica',
+
+  // Ley Silla (Insuficiencia Venosa)
+  'leysilla_int': 'Ley Silla - Interrogatorio',
+  'leysilla_exp': 'Ley Silla - Exploración física',
+
+  // Evaluación Médica / Exploración (Unified V6.1) - Columnas Originales
   'eval_craneo': 'Exp. Cráneo',
   'eval_cara': 'Exp. Cara',
   'eval_cuello': 'Exp. Cuello',
@@ -117,13 +184,17 @@ const FIELD_MAP = {
   'eval_varices': 'Exp. Várices',
   'eval_tatuajes': 'Exp. Tatuajes',
   'evaluacionData': 'Evaluación Detallada',
+  'exploracionData': 'Exploración Detallada',
   
   // Conclusión y Aptitud
   'aptitud_medica': 'Aptitud Médica',
-  'aptitud_restricciones': 'Restricciones Médicas',
+  'aptitud_restricciones': 'Restricciones Mèdicas',
   'seguimiento_fecha': 'Fecha Seguimiento',
+  'restr_enfermedad_general': 'Enfermedad General',
+  'restr_riesgo_trabajo': 'Riesgo Trabajo',
+  'tipo_riesgo': 'Tipo Riesgo',
 
-  // Evaluación Médica (Sistemas)
+  // Evaluación Médica (Sistemas) - Columnas Originales
   'eval_organos_y_sentidos': 'Eval. Órganos',
   'eval_piel': 'Eval. Piel',
   'eval_cabello': 'Eval. Cabello',
@@ -141,6 +212,58 @@ const FIELD_MAP = {
   'eval_columna': 'Eval. Columna (Med)',
   'eval_sistema_linfatico': 'Eval. Linfático',
   'eval_sistema_nervioso': 'Eval. Nervioso',
+
+  // NUEVO: Hallazgos Detallados (Paso 5 - Doble Columna)
+  'eval_craneo_hallazgo': 'Hallazgo: Cráneo',
+  'eval_craneo_obs': 'Observación: Cráneo',
+  'eval_cara_hallazgo': 'Hallazgo: Cara',
+  'eval_cara_obs': 'Observación: Cara',
+  'eval_ojos_hallazgo': 'Hallazgo: Ojos',
+  'eval_ojos_obs': 'Observación: Ojos',
+  'eval_oidos_hallazgo': 'Hallazgo: Oídos',
+  'eval_oidos_obs': 'Observación: Oídos',
+  'eval_nariz_hallazgo': 'Hallazgo: Nariz',
+  'eval_nariz_obs': 'Observación: Nariz',
+  'eval_boca_hallazgo': 'Hallazgo: Boca',
+  'eval_boca_obs': 'Observación: Boca',
+  'eval_faringe_hallazgo': 'Hallazgo: Faringe',
+  'eval_faringe_obs': 'Observación: Faringe',
+  'eval_abdomen_hallazgo': 'Hallazgo: Abdomen',
+  'eval_abdomen_obs': 'Observación: Abdomen',
+  'eval_columna_hallazgo': 'Hallazgo: Columna',
+  'eval_columna_obs': 'Observación: Columna',
+  'eval_respiratorio_hallazgo': 'Hallazgo: Respiratorio',
+  'eval_respiratorio_obs': 'Observación: Respiratorio',
+  'eval_cardio_hallazgo': 'Hallazgo: Cardio',
+  'eval_cardio_obs': 'Observación: Cardio',
+  'eval_digestivo_hallazgo': 'Hallazgo: Digestivo',
+  'eval_digestivo_obs': 'Observación: Digestivo',
+  'eval_genitourinario_hallazgo': 'Hallazgo: Genitourinario',
+  'eval_genitourinario_obs': 'Observación: Genitourinario',
+  'eval_msts_hallazgo': 'Hallazgo: MsTs',
+  'eval_msts_obs': 'Observación: MsTs',
+  'eval_msps_hallazgo': 'Hallazgo: MsPs',
+  'eval_msps_obs': 'Observación: MsPs',
+  'eval_articulaciones_hallazgo': 'Hallazgo: Articulaciones',
+  'eval_articulaciones_obs': 'Observación: Articulaciones',
+  'eval_marcha_hallazgo': 'Hallazgo: Marcha',
+  'eval_marcha_obs': 'Observación: Marcha',
+  'eval_reflejos_hallazgo': 'Hallazgo: Reflejos',
+  'eval_reflejos_obs': 'Observación: Reflejos',
+  'eval_piel_hallazgo': 'Hallazgo: Piel',
+  'eval_piel_obs': 'Observación: Piel',
+  'eval_cabello_hallazgo': 'Hallazgo: Cabello',
+  'eval_cabello_obs': 'Observación: Cabello',
+  'eval_sentidos_hallazgo': 'Hallazgo: Org. Sentidos',
+  'eval_sentidos_obs': 'Observación: Org. Sentidos',
+  'eval_linfatico_hallazgo': 'Hallazgo: Linfático',
+  'eval_linfatico_obs': 'Observación: Linfático',
+  'eval_nervioso_hallazgo': 'Hallazgo: Nervioso',
+  'eval_nervioso_obs': 'Observación: Nervioso',
+  'eval_varices_hallazgo': 'Hallazgo: Várices',
+  'eval_varices_obs': 'Observación: Várices',
+  'eval_tatuajes_hallazgo': 'Hallazgo: Tatuajes',
+  'eval_tatuajes_obs': 'Observación: Tatuajes',
   
   // Actividades Restringidas (Paso 6)
   'restr_enfermedad_general': 'Enfermedad General',
@@ -158,6 +281,7 @@ const FIELD_MAP = {
   'notas': 'Observaciones'
 };
 
+
 // Configuración de URL
 function doGet(e) {
   return ContentService.createTextOutput("✅ Servidor V6 (DINÁMICO) ACTIVO.\n\nEl sistema ahora es capaz de detectar y crear columnas automáticamente.")
@@ -170,7 +294,7 @@ function doPost(e) {
     const data = JSON.parse(contents);
     let result;
 
-    // 🔓 Acciones PÚBLICAS (Sin token - Para QR y acceso externo)
+    // 🔓 Acciones PÚBLICAS (Sin token - Para QR, búsqueda y acceso externo)
     if (data.action === 'login') {
        setupAuthDatabase();
        result = validateLogin(data.user, data.passHash);
@@ -178,32 +302,35 @@ function doPost(e) {
        result = changePassword(data.user, data.oldHash, data.newHash);
     } else if (data.action === 'resetPassword') {
        result = resetPassword(data.userOrEmail);
+    } else if (data.action === 'search') {
+       result = searchEmployee(data.id);
+    } else if (data.action === 'getProfile') {
+       result = getProfile(data.id);
+    } else if (data.action === 'supervisorSearch') {
+       result = getSupervisorRecord(data.id);
     } else {
        const token = data.token;
        if (!token) return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Token requerido" })).setMimeType(ContentService.MimeType.JSON);
        
-       if (data.action !== 'search' && data.action !== 'getProfile') renewSession(token);
+       renewSession(token);
 
        if (data.action === 'keepAlive') result = { success: true, message: "Session Renewed" };
        else if (data.action === 'getAiSuggestion') result = getAiSuggestion(data);
        else if (data.action === 'getDashboardData') result = getDashboardData();
        else if (data.action === 'updateExcelDashboard') {
-          createDashboard();
-          result = { success: true, message: "Dashboard Updated" };
+          result = { success: true, message: "Dashboard Update Disabled" };
        }
-       else if (data.action === 'search') result = searchEmployee(data.id);
-       else if (data.action === 'getProfile') result = getProfile(data.id);
        else if (data.action === 'save' || data.action === 'update') {
           const lock = LockService.getScriptLock();
           if (lock.tryLock(30000)) {
             try {
-              result = processForm(data); // LLAMADA AL NUEVO PROCESADOR
+              result = processForm(data);
             } finally { lock.releaseLock(); }
           } else {
              return ContentService.createTextOutput(JSON.stringify({success:false, error:"Servidor ocupado."})).setMimeType(ContentService.MimeType.JSON);
           }
        } else if (data.action === 'getRecordCount') {
-          const s = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Registro');
+          const s = getRegistroSheet();
           result = { success: true, count: s ? Math.max(0, s.getLastRow() - 1) : 0 };
        } else {
           result = { success: false, error: "Acción desconocida: " + data.action };
@@ -215,33 +342,56 @@ function doPost(e) {
   } 
 }
 
+
+/**
+ * 🛠️ HELPER: Obtener encabezados actuales y Mapeo de Índices
+ */
+function normalizeHeader(str) {
+  if (!str) return '';
+  return String(str)
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
 /**
  * 🛠️ HELPER: Obtener encabezados actuales y Mapeo de Índices
  */
 function getSheetHeaders(sheet) {
   const lastCol = sheet.getLastColumn();
-  if (lastCol < 1) return { headers: [], map: {} };
+  if (lastCol < 1) return { headers: [], map: {}, normalizedMap: {} };
   const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   const map = {};
-  headers.forEach((h, i) => map[h] = i); // Nombre -> Índice (0-based)
-  return { headers, map, lastCol };
+  const normalizedMap = {};
+  headers.forEach((h, i) => {
+    map[h] = i;
+    const norm = normalizeHeader(h);
+    if (norm && normalizedMap[norm] === undefined) {
+      normalizedMap[norm] = i;
+    }
+  });
+  return { headers, map, normalizedMap, lastCol };
 }
 
 /**
- * 🛠️ HELPER: Sincronizar columnas (Crea las que falten)
+ * 🛠️ HELPER: Sincronizar columnas (Crea las que falten de forma inteligente)
  */
 function syncHeaders(sheet) {
-  let { headers } = getSheetHeaders(sheet);
-  const requiredHeaders = Object.values(FIELD_MAP).filter( val => val !== null ); // Solo valores no nulos
+  let { headers, map, normalizedMap } = getSheetHeaders(sheet);
+  const requiredKeys = Object.keys(FIELD_MAP);
   
-  const missing = requiredHeaders.filter(h => !headers.includes(h));
+  const missing = [];
+  requiredKeys.forEach(key => {
+    const headerName = FIELD_MAP[key];
+    if (headerName && findColIndex(key, map, normalizedMap) === undefined) {
+       missing.push(headerName);
+    }
+  });
   
   if (missing.length > 0) {
-    // Agregar columnas faltantes al final
     sheet.getRange(1, headers.length + 1, 1, missing.length).setValues([missing]);
-    // Dar formato
-    sheet.getRange(1, headers.length + 1, 1, missing.length).setFontWeight('bold').setBackground('#eff6ff'); /* Azulito claro para distinguir nuevas */
-    return true; // Hubo cambios
+    sheet.getRange(1, headers.length + 1, 1, missing.length).setFontWeight('bold').setBackground('#eff6ff');
+    return true;
   }
   return false;
 }
@@ -250,7 +400,6 @@ function syncHeaders(sheet) {
  * 🛠️ HELPER: Auto-Corregir Formatos (Repara daños por mover columnas)
  */
 function applyColumnFormats(sheet, map) {
-  // 1. Formatos de Texto (@)
   const textFields = ['Programas', 'Nombre', 'Género', 'Contacto', 'Lugar Nacimiento', 
                       'Estado Civil', 'Escolaridad', 'Supervisor', 'Planta', 'Área', 
                       'Puesto', 'Funciones Puesto', 'Padecimiento', 'Notas', 'Alcohol Tipo', 
@@ -260,7 +409,6 @@ function applyColumnFormats(sheet, map) {
      if (map[f]) sheet.getRange(2, map[f] + 1, sheet.getLastRow(), 1).setNumberFormat("@");
   });
 
-  // 2. Formatos de Número Entero (0)
   const intFields = ['Edad', 'Antigüedad Puesto', 'Antigüedad Empresa', 'TA Sistólica', 
                      'TA Diastólica', 'Pulso', 'Body Age', 'Glucometría', 'Oximetría'];
   
@@ -268,61 +416,152 @@ function applyColumnFormats(sheet, map) {
      if (map[f]) sheet.getRange(2, map[f] + 1, sheet.getLastRow(), 1).setNumberFormat("0");
   });
 
-  // 3. Formatos de Número Decimal (0.00)
   const decFields = ['Peso', 'Talla', 'IMC', '% FAT', '% MUSC', 'RMI', 'Grasa Visceral', 'Temperatura'];
   
   decFields.forEach(f => {
      if (map[f]) sheet.getRange(2, map[f] + 1, sheet.getLastRow(), 1).setNumberFormat("0.0");
   });
 
-  // 4. Formatos de Fecha (dd/MM/yyyy)
   const dateFields = ['Fecha Ingreso Puesto', 'Fecha Ingreso Empresa'];
   
   dateFields.forEach(f => {
      if (map[f]) sheet.getRange(2, map[f] + 1, sheet.getLastRow(), 1).setNumberFormat("dd/MM/yyyy");
   });
   
-  // 5. Fecha Registro (Con hora)
   if (map['Fecha Registro']) {
      sheet.getRange(2, map['Fecha Registro'] + 1, sheet.getLastRow(), 1).setNumberFormat("dd/MM/yyyy - hh:mm am/pm");
   }
 }
 
 /**
+ * 🛠️ HELPER: Buscar la hoja 'Registro' de forma tolerante a espacios y mayúsculas
+ */
+function getRegistroSheet(ss) {
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('Registro');
+  if (!sheet) {
+    const sheets = ss.getSheets();
+    sheet = sheets.find(s => s.getName().trim().toLowerCase() === 'registro');
+  }
+  return sheet;
+}
+
+
+const FIELD_ALIASES = {
+  'num': ['Núm', 'Num', 'No', 'ID', 'Número', 'No. Empleado', 'Num Empleado', 'Número Empleado', 'No. de Empleado'],
+  'epp_lista': ['EPP Lista', 'EPP', 'Equipo de Protección Personal', 'EPP Utilizado', 'Lista EPP'],
+  'epp_otros': ['EPP Otros Detalle', 'EPP Otros', 'Otros EPP'],
+
+  'expo_quimicos_1': ['Exposicion quimico 1', 'Exposición Químicos 1', 'Exposicion Quimica 1', 'Exposicion quimicos 1', 'Riesgo Quimico 1', 'Quimicos 1'],
+  'expo_quimicos_1_detalle': ['Exposicion quimico detalle 1', 'Exposición Químicos Detalle 1', 'Exposicion quimica detalle 1', 'Detalle Quimicos 1'],
+  'expo_fisicos_1': ['Exposicion Fisicos 1', 'Exposición Físicos 1', 'Exposicion Fisico 1', 'Riesgo Fisico 1', 'Fisicos 1'],
+  'expo_fisicos_1_detalle': ['Exposicion Fisico Dtalle 1', 'Exposicion Fisico Detalle 1', 'Exposición Físicos Detalle 1', 'Detalle Fisicos 1'],
+  'expo_carga_fisica_1': ['Exposicion Carga fisica 1', 'Exposición Carga Física 1', 'Carga Fisica 1'],
+  'expo_carga_fisica_1_detalle': ['Exposicion Carga fisica detalle 1', 'Exposición Carga Física Detalle 1', 'Carga Fisica Detalle 1'],
+  'expo_ergonomicos_1': ['Exposicion Ergonomico 1', 'Exposición Ergonómicos 1', 'Exposicion Ergonomicos 1', 'Ergonomicos 1'],
+  'expo_ergonomicos_1_detalle': ['Exposicion Ergonomico detalle 1', 'Exposición Ergonómicos Detalle 1', 'Ergonomicos Detalle 1'],
+  'expo_epp_1': ['Exposicion EPP 1', 'Exposición EPP 1', 'EPP 1'],
+  'expo_epp_1_detalle': ['Exposicion EPP detalle 1', 'Exposición EPP Detalle 1', 'EPP Detalle 1'],
+
+  'expo_quimicos_2': ['Exposicion quimico 2', 'Exposición Químicos 2', 'Exposicion Quimica 2', 'Exposicion quimicos 2', 'Riesgo Quimico 2', 'Quimicos 2'],
+  'expo_quimicos_2_detalle': ['Exposicion quimico detalle 2', 'Exposición Químicos Detalle 2', 'Exposicion quimica detalle 2', 'Detalle Quimicos 2'],
+  'expo_fisicos_2': ['Exposicion Fisicos 2', 'Exposición Físicos 2', 'Exposicion Fisico 2', 'Riesgo Fisico 2', 'Fisicos 2'],
+  'expo_fisicos_2_detalle': ['Exposicion Fisico Dtalle 2', 'Exposicion Fisico Detalle 2', 'Exposición Físicos Detalle 2', 'Detalle Fisicos 2'],
+  'expo_carga_fisica_2': ['Exposicion Carga fisica 2', 'Exposición Carga Física 2', 'Carga Fisica 2'],
+  'expo_carga_fisica_2_detalle': ['Exposicion Carga fisica detalle 2', 'Exposición Carga Física Detalle 2', 'Carga Fisica Detalle 2'],
+  'expo_ergonomicos_2': ['Exposicion Ergonomico 2', 'Exposición Ergonómicos 2', 'Exposicion Ergonomicos 2', 'Ergonomicos 2'],
+  'expo_ergonomicos_2_detalle': ['Exposicion Ergonomico detalle 2', 'Exposición Ergonómicos Detalle 2', 'Ergonomicos Detalle 2'],
+  'expo_epp_2': ['Exposicion EPP 2', 'Exposición EPP 2', 'EPP 2'],
+  'expo_epp_2_detalle': ['Exposicion EPP detalle 2', 'Exposición EPP Detalle 2', 'EPP Detalle 2'],
+
+  'expo_quimicos_3': ['Exposicion quimico 3', 'Exposición Químicos 3', 'Exposicion Quimica 3', 'Exposicion quimicos 3', 'Riesgo Quimico 3', 'Quimicos 3'],
+  'expo_quimicos_3_detalle': ['Exposicion quimico detalle 3', 'Exposición Químicos Detalle 3', 'Exposicion quimica detalle 3', 'Detalle Quimicos 3'],
+  'expo_fisicos_3': ['Exposicion Fisicos 3', 'Exposición Físicos 3', 'Exposicion Fisico 3', 'Riesgo Fisico 3', 'Fisicos 3'],
+  'expo_fisicos_3_detalle': ['Exposicion Fisico Dtalle 3', 'Exposicion Fisico Detalle 3', 'Exposición Físicos Detalle 3', 'Detalle Fisicos 3'],
+  'expo_carga_fisica_3': ['Exposicion Carga fisica 3', 'Exposición Carga Física 3', 'Carga Fisica 3'],
+  'expo_carga_fisica_3_detalle': ['Exposicion Carga fisica detalle 3', 'Exposición Carga Física Detalle 3', 'Carga Fisica Detalle 3'],
+  'expo_ergonomicos_3': ['Exposicion Ergonomico 3', 'Exposición Ergonómicos 3', 'Exposicion Ergonomicos 3', 'Ergonomicos 3'],
+  'expo_ergonomicos_3_detalle': ['Exposicion Ergonomico detalle 3', 'Exposición Ergonómicos Detalle 3', 'Ergonomicos Detalle 3'],
+  'expo_epp_3': ['Exposicion EPP 3', 'Exposición EPP 3', 'EPP 3'],
+  'expo_epp_3_detalle': ['Exposicion EPP detalle 3', 'Exposición EPP Detalle 3', 'EPP Detalle 3']
+};
+
+function findColIndex(key, map, normalizedMap) {
+  const primaryHeader = FIELD_MAP[key];
+  if (primaryHeader) {
+     if (map[primaryHeader] !== undefined) return map[primaryHeader];
+     const normPrimary = normalizeHeader(primaryHeader);
+     if (normalizedMap[normPrimary] !== undefined) return normalizedMap[normPrimary];
+  }
+  
+  const aliases = FIELD_ALIASES[key] || [];
+  for (let i = 0; i < aliases.length; i++) {
+     const alias = aliases[i];
+     if (map[alias] !== undefined) return map[alias];
+     const normAlias = normalizeHeader(alias);
+     if (normalizedMap[normAlias] !== undefined) return normalizedMap[normAlias];
+  }
+
+  const normKey = normalizeHeader(key);
+  if (normalizedMap[normKey] !== undefined) return normalizedMap[normKey];
+
+  return undefined;
+}
+
+/**
+ * 🛠️ HELPER: Buscar la hoja 'Registro' o cualquier hoja activa de forma ultra-tolerante
+ */
+function getRegistroSheet(ss) {
+  if (!ss) {
+    try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  }
+  if (!ss) {
+    try {
+      const SS_ID = "1I9KkIWTUfzpHqzK0XvP930DA9DEQfGb0VjEj_0i_Th0";
+      ss = SpreadsheetApp.openById(SS_ID);
+    } catch (e) {}
+  }
+  if (!ss) return null;
+
+  let sheet = ss.getSheetByName('Registro');
+  if (!sheet) {
+    const sheets = ss.getSheets();
+    sheet = sheets.find(s => s.getName().trim().toLowerCase() === 'registro');
+    if (!sheet && sheets.length > 0) sheet = sheets[0];
+  }
+  return sheet;
+}
+
+/**
  * 🔥 PROCESS FORM V6: DINÁMICO
  */
 function processForm(data) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName('Registro');
+  let ss;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  if (!ss) {
+    const SS_ID = "1I9KkIWTUfzpHqzK0XvP930DA9DEQfGb0VjEj_0i_Th0";
+    ss = SpreadsheetApp.openById(SS_ID);
+  }
+  let sheet = getRegistroSheet(ss);
   
   // 1. Crear Hoja si no existe
   if (!sheet) {
     sheet = ss.insertSheet('Registro');
-    // Inicializar con TODOS los headers definidos en el mapa
     const initialHeaders = Object.values(FIELD_MAP).filter(v => v);
     sheet.appendRow(initialHeaders);
     sheet.getRange(1, 1, 1, initialHeaders.length).setFontWeight('bold').setBackground('#e2e8f0');
     sheet.setFrozenRows(1);
-    createDashboard();
   }
 
-  // 2. Sincronizar Headers (Por si agregas columnas nuevas en el código)
   syncHeaders(sheet);
+  const { headers, map, normalizedMap } = getSheetHeaders(sheet);
   
-  // 3. Obtener Mapa Actualizado
-  const { headers, map } = getSheetHeaders(sheet);
-  
-  // ⚡ AUTO-REPARAR FORMATOS (Desactivado para mejorar velocidad - instantáneo)
-  // applyColumnFormats(sheet, map);
-  
-  // 4. Preparar Fila de Datos
   let rowData;
   const lastRow = sheet.getLastRow();
   const isUpdate = (data.rowIndex && data.action === 'update');
   
   if (isUpdate) {
     const targetRow = parseInt(data.rowIndex);
-    // Obtener valores actuales para no perder datos de pasos no enviados
     rowData = sheet.getRange(targetRow, 1, 1, headers.length).getValues()[0];
   } else {
     rowData = new Array(headers.length).fill('');
@@ -330,39 +569,21 @@ function processForm(data) {
   
   // 5. Llenar / Mezclar datos
   for (const [key, value] of Object.entries(data)) {
-    const headerName = FIELD_MAP[key];
-    if (headerName && map.hasOwnProperty(headerName)) {
-       const colIndex = map[headerName];
-       
+    const colIndex = findColIndex(key, map, normalizedMap);
+    if (colIndex !== undefined) {
        let finalValue = value;
-       
-       // 🛠️ FIX: Formatear JSON de Evaluación / Exploración a Texto Legible
-       if ((key === 'evaluacionData' || key === 'exploracionData') && value && value.startsWith('[')) {
-          try {
-             const items = JSON.parse(value);
-             if (Array.isArray(items) && items.length > 0) {
-                finalValue = items.map(i => `• ${i.item}: ${i.detalle}`).join('\n');
-             }
-          } catch(e) {
-             // Si falla, dejar valor original
-          }
-       }
-
-       // Si el usuario envió algo vacío, ponemos "N/A"
        if (finalValue === '' || finalValue === null || finalValue === undefined) {
          finalValue = 'N/A';
        }
-       
        rowData[colIndex] = finalValue;
     }
   }
 
   // Final Pass: Asegurar que celdas vacías (especialmente en nuevos registros) tengan "N/A"
-  // Esto evita que queden huecos si un paso no se envió.
   for (let i = 0; i < rowData.length; i++) {
     const hName = headers[i];
-    // Excluimos la fecha de registro para que se llene correctamente abajo
     if (hName === 'Fecha Registro') continue;
+    if (hName === 'Última Actualización') continue;
     
     if (rowData[i] === '' || rowData[i] === null || rowData[i] === undefined) {
       rowData[i] = 'N/A';
@@ -370,11 +591,7 @@ function processForm(data) {
   }
   
   // 6. Campos Especiales (Calculados o Timestamp)
-  // Timestamp
   if (map['Fecha Registro'] !== undefined) {
-    // Si estamos actualizando, tratamos de preservar la fecha original
-    // Pero si es nuevo registro, fecha nueva
-    // La lógica de update vs create maneja esto abajo
     rowData[map['Fecha Registro']] = new Date(); 
   }
 
@@ -405,105 +622,116 @@ function processForm(data) {
   });
 
   // 7. Escribir
-  
   if (data.rowIndex && data.action === 'update') {
      const rowIndex = parseInt(data.rowIndex);
      if (rowIndex < 2 || rowIndex > lastRow + 1) throw new Error("Índice inválido");
      
-     // Preservar fecha original
      if (map['Fecha Registro'] !== undefined) {
         const existingDate = sheet.getRange(rowIndex, map['Fecha Registro'] + 1).getValue();
         if (existingDate) rowData[map['Fecha Registro']] = existingDate;
      }
 
-     // Update Block
+     if (map['Última Actualización'] !== undefined) {
+        rowData[map['Última Actualización']] = new Date();
+     }
+
      sheet.getRange(rowIndex, 1, 1, rowData.length).setValues([rowData]);
      
-      // Formato de Fecha con Hora
       if (map['Fecha Registro'] !== undefined) {
          sheet.getRange(rowIndex, map['Fecha Registro'] + 1).setNumberFormat("dd/MM/yyyy - hh:mm am/pm");
       }
-      
-      // Formato IMC (Prevent Date Conversion)
+      if (map['Última Actualización'] !== undefined) {
+         sheet.getRange(rowIndex, map['Última Actualización'] + 1).setNumberFormat("dd/MM/yyyy - hh:mm am/pm");
+      }
       if (map['IMC'] !== undefined) {
          sheet.getRange(rowIndex, map['IMC'] + 1).setNumberFormat("0.0");
       }
 
-     createDashboard(); // ✅ REACTIVADO: Dashboard Inteligente con Nuevas Gráficas
      return { success: true, rowIndex: rowIndex };
   } else {
-     // Create Block
      const newRow = lastRow + 1;
+     
+     if (map['Última Actualización'] !== undefined) {
+        rowData[map['Última Actualización']] = new Date();
+     }
+
      sheet.getRange(newRow, 1, 1, rowData.length).setValues([rowData]);
      
-      // Formato de Fecha con Hora
       if (map['Fecha Registro'] !== undefined) {
          sheet.getRange(newRow, map['Fecha Registro'] + 1).setNumberFormat("dd/MM/yyyy - hh:mm am/pm");
       }
-      
-      // Formato IMC (Prevent Date Conversion)
+      if (map['Última Actualización'] !== undefined) {
+         sheet.getRange(newRow, map['Última Actualización'] + 1).setNumberFormat("dd/MM/yyyy - hh:mm am/pm");
+      }
       if (map['IMC'] !== undefined) {
          sheet.getRange(newRow, map['IMC'] + 1).setNumberFormat("0.0");
       }
 
-     createDashboard(); // ✅ REACTIVADO: Dashboard Inteligente con Nuevas Gráficas
      return { success: true, rowIndex: newRow };
   }
 }
 
+
 /**
- * 🔥 READ FUNCTION V6: SEARCH (Lectura Dinámica)
+ * 🔥 READ FUNCTION V6: SEARCH (Lectura Dinámica Multi-Hoja & Tolerante a Formato)
  */
 function searchEmployee(id) {
-  const SS_ID = "1I9KkIWTUfzpHqzK0XvP930DA9DEQfGb0VjEj_0i_Th0"; 
-  const ss = SpreadsheetApp.openById(SS_ID);
-  const sheet = ss.getSheetByName('Registro');
-  if (!sheet) return { success: true, found: false, results: [] };
+  let ss;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  if (!ss) {
+    try {
+      const SS_ID = "1I9KkIWTUfzpHqzK0XvP930DA9DEQfGb0VjEj_0i_Th0";
+      ss = SpreadsheetApp.openById(SS_ID);
+    } catch (e) {}
+  }
+  if (!ss) return { success: false, error: "No se pudo acceder a la hoja de cálculo." };
 
-  const { headers, map, lastCol } = getSheetHeaders(sheet);
-  
-  // Validar que exista columna Núm
-  if (map['Núm'] === undefined) return { success: false, error: "Columna 'Núm' no encontrada en Excel" };
-  const colIndexID = map['Núm']; // 0-based
-
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return { success: true, found: false, results: [] };
-
-  // Leer todo (Optimizado)
-  const data = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
-  const results = [];
   const targetId = String(id).trim();
+  if (!targetId) return { success: true, found: false, results: [] };
 
-  // Mapa Inverso: Header -> Key (Para reconstruir el objeto)
-  const reverseMap = {};
-  for (const [key, header] of Object.entries(FIELD_MAP)) {
-     if (header) reverseMap[header] = key;
-  }
+  const sheetsToSearch = ss.getSheets();
+  const results = [];
 
-  for (let i = 0; i < data.length; i++) {
-    const row = data[i];
-    if (String(row[colIndexID]).trim() === targetId) {
-       // Construir objeto dinámicamente
-       const recordData = {};
-       
-       headers.forEach((h, idx) => {
-          const key = reverseMap[h];
-          if (key) {
-             recordData[key] = row[idx];
+  sheetsToSearch.forEach(sheet => {
+    const { headers, map, normalizedMap, lastCol } = getSheetHeaders(sheet);
+    const colIndexID = findColIndex('num', map, normalizedMap);
+    if (colIndexID === undefined) return;
+
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return;
+
+    const colValues = sheet.getRange(2, colIndexID + 1, lastRow - 1, 1).getValues();
+    colValues.forEach((rVal, idx) => {
+      const cellVal = String(rVal[0]).trim();
+      if (cellVal === targetId) {
+        const rowIndex = idx + 2;
+        const rowValues = sheet.getRange(rowIndex, 1, 1, lastCol).getValues()[0];
+        
+        const recordData = {};
+        for (const key of Object.keys(FIELD_MAP)) {
+          const cIdx = findColIndex(key, map, normalizedMap);
+          if (cIdx !== undefined && cIdx < rowValues.length) {
+            recordData[key] = rowValues[cIdx];
           }
-       });
-       
-       results.push({
-         rowIndex: i + 2, // 1-based + header
-         date: recordData.timestamp || row[0],
-         data: recordData
-       });
-    }
-  }
-  
+        }
+
+        results.push({
+          rowIndex: rowIndex,
+          sheetName: sheet.getName(),
+          date: recordData.timestamp || rowValues[0],
+          data: recordData
+        });
+      }
+    });
+  });
+
+  if (results.length === 0) return { success: true, found: false, results: [] };
+
+  // Siempre poner el último registro hasta arriba (Orden Descendente)
   results.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return { success: true, found: results.length > 0, results: results };
+  return { success: true, found: true, results: results };
 }
+
 
 /**
  * 🔥 GET PROFILE: Recupera solo los datos de identidad más recientes.
@@ -533,6 +761,56 @@ function getProfile(id) {
   }
   return { success: true, found: false };
 }
+
+
+/**
+ * 🔥 GET SUPERVISOR RECORD: Recupera datos de identidad + restricciones (Paso 6).
+ * Siempre devuelve el registro MÁS RECIENTE del empleado.
+ */
+function getSupervisorRecord(id) {
+  try {
+    // Reutilizamos la búsqueda optimizada (YA TIENE SORT POR FECHA DESC)
+    const result = searchEmployee(id);
+    
+    if (!result.success) return result;
+    if (!result.found) return { success: true, found: false };
+
+    // El primer resultado ya es el más reciente debido al sort en searchEmployee
+    const latest = result.results[0].data;
+
+    // Helper para extraer valor seguro
+    const val = (key) => {
+      const v = latest[key];
+      return (v === 'N/A' || v === null || v === undefined) ? '' : String(v);
+    };
+
+    // Construir respuesta limpia usando las llaves del FIELD_MAP
+    const record = {
+      nombre: val('nombre'),
+      num: val('num'),
+      supervisor: val('supervisor'),
+      unidad_negocio: val('unidadNegocio'),
+      // Restricciones (Paso 6)
+      enfermedad_general: val('restr_enfermedad_general'),
+      riesgo_trabajo: val('restr_riesgo_trabajo'),
+      tipo_restriccion: val('restr_tipo'),
+      alta: val('restr_alta'),
+      fecha_inicio: val('restr_fecha_inicio'),
+      fecha_termino: val('restr_fecha_termino'),
+      motivo: val('restr_motivo'),
+      region_afectada: val('restr_region_afectada'),
+      lista_restricciones: val('restr_lista'),
+      otras_restricciones: val('restr_otros'),
+      // Fecha del registro
+      fecha_registro: val('timestamp')
+    };
+
+    return { success: true, found: true, record: record };
+  } catch(e) {
+    return { success: false, error: e.toString() };
+  }
+}
+
 
 
 /**
@@ -592,213 +870,8 @@ function getDashboardData() {
   }
 }
 
-/**
- * Crea o actualiza el Dashboard Nutricional "Premium".
- * Se ejecuta automáticamente al guardar nuevos datos.
- * ⚡ OPTIMIZADO V6.2: Lógica "Smart Update" para evitar reconstrucción.
- */
-/**
- * Crea o actualiza el Dashboard Nutricional "Premium".
- * Se ejecuta automáticamente al guardar nuevos datos.
- * ⚡ OPTIMIZADO V6.5: Lógica "Smart Update" y Nuevas Gráficas Organizacionales.
- */
-function createDashboard() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const dataSheet = ss.getSheetByName('Registro');
-  try {
-    if (!dataSheet || dataSheet.getLastRow() < 2) return; 
-    
-    let calcSheet = ss.getSheetByName('Calculos_Aux');
-    if (!calcSheet) {
-      calcSheet = ss.insertSheet('Calculos_Aux');
-      calcSheet.hideSheet();
-    }
-    calcSheet.clear();
-    
-    // --- A. PROCESAMIENTO DE DATOS ---
-    const headers = dataSheet.getRange(1, 1, 1, dataSheet.getLastColumn()).getValues()[0];
-    const dataRowRange = dataSheet.getRange(2, 1, dataSheet.getLastRow() - 1, dataSheet.getLastColumn());
-    const data = dataRowRange.getValues();
-    
-    const iIMC = headers.indexOf('IMC');
-    const iTASis = headers.indexOf('TA Sistólica');
-    const iTADias = headers.indexOf('TA Diastólica');
-    const iEdad = headers.indexOf('Edad');
-    const iBodyAge = headers.indexOf('Body Age');
-    const iFat = headers.indexOf('% FAT');
-    const iMusc = headers.indexOf('% MUSC');
-    const iPadecimiento = headers.indexOf('Padecimiento');
-    const iAptitud = headers.indexOf('Aptitud Médica');
-    const iUnidad = headers.indexOf('Unidad de Negocio');
-    const iArea = headers.indexOf('Área');
+// [ELIMINADO]: createDashboard() y createKpiCard() fueron removidos para evitar el consumo excesivo de cuotas de Google Sheets y mejorar drásticamente el tiempo de respuesta. El Dashboard ahora se maneja exclusivamente en el Frontend (App Web).
 
-    // Hallazgos clínicos (Sistemas Paso 5)
-    const clinicalHeaders = [
-      'Exp. Cráneo', 'Exp. Cara', 'Exp. Cuello', 'Exp. Abdomen', 'Exp. MsTs', 'Exp. MsPs', 
-      'Exp. Articulaciones', 'Exp. Columna', 'Exp. Reflejos', 'Exp. Várices', 'Eval. Órganos', 
-      'Eval. Piel', 'Eval. Respiratorio', 'Eval. Cardio', 'Eval. Digestivo', 'Eval. Genitourinario'
-    ];
-    const clinicalIndices = clinicalHeaders.map(h => headers.indexOf(h)).filter(idx => idx > -1);
-
-    const processedData = [['ID', 'Score', 'IMC_Clasif', 'Cardio', 'Aptitud', 'Unidad', 'Area']];
-    const buRestrictions = {}; // Unidad -> Contador Restricciones
-    const fitnessCounts = { 'Apto': 0, 'Apto con Restr.': 0, 'No Apto': 0, 'N/A': 0 };
-    const systemAnomalies = {}; // Sistema -> Contador "Anormal"
-
-    data.forEach((row, index) => {
-      let score = 100;
-      
-      // 1. IMC & Cardio (Sigue lógica original)
-      const imc = (iIMC > -1) ? (parseFloat(row[iIMC]) || 0) : 0;
-      let clasif = imc >= 30 ? 'Obesidad' : (imc >= 25 ? 'Sobrepeso' : 'Normal');
-      if (imc >= 30) score -= 20;
-
-      const sis = (iTASis > -1) ? (parseInt(row[iTASis]) || 0) : 0;
-      const dias = (iTADias > -1) ? (parseInt(row[iTADias]) || 0) : 0;
-      let cardio = (sis >= 140 || dias >= 90) ? 'Riesgo Alto' : 'Normal';
-      if (cardio === 'Riesgo Alto') score -= 30;
-
-      // 2. Aptitud & Unidad (NUEVO)
-      const aptitud = (iAptitud > -1) ? String(row[iAptitud] || 'N/A') : 'N/A';
-      const unidad = (iUnidad > -1) ? String(row[iUnidad] || 'Sin Unidad') : 'Sin Unidad';
-      
-      // Contadores para gráficas
-      if (aptitud.includes('Restr')) {
-        buRestrictions[unidad] = (buRestrictions[unidad] || 0) + 1;
-        fitnessCounts['Apto con Restr.']++;
-      } else if (aptitud.includes('No Apto')) {
-        fitnessCounts['No Apto']++;
-      } else if (aptitud.includes('Apto')) {
-        fitnessCounts['Apto']++;
-      } else {
-        fitnessCounts['N/A']++;
-      }
-
-      // 3. Hallazgos Sistemas (NUEVO)
-      clinicalIndices.forEach(idx => {
-        const val = String(row[idx] || '').toLowerCase();
-        if (val.includes('anormal')) {
-          const sysName = headers[idx];
-          systemAnomalies[sysName] = (systemAnomalies[sysName] || 0) + 1;
-        }
-      });
-
-      processedData.push([`E-${index+1}`, score, clasif, cardio, aptitud, unidad, (iArea > -1 ? row[iArea] : '')]);
-    });
-
-    // --- B. TABLAS DE AGREGACIÓN EN CALCULOS_AUX ---
-    
-    // Tabla 1: Restricciones por Unidad
-    const buTable = [['Unidad de Negocio', 'Restricciones']];
-    Object.entries(buRestrictions).forEach(([k, v]) => buTable.push([k, v]));
-    calcSheet.getRange(1, 1, buTable.length, 2).setValues(buTable);
-
-    // Tabla 2: Aptitud General
-    const fitTable = [['Estado', 'Cantidad']];
-    Object.entries(fitnessCounts).forEach(([k, v]) => fitTable.push([k, v]));
-    calcSheet.getRange(1, 4, fitTable.length, 2).setValues(fitTable);
-
-    // Tabla 3: Hallazgos por Sistema
-    const sysTable = [['Sistema', 'Hallazgos Anormales']];
-    Object.entries(systemAnomalies).sort((a,b) => b[1]-a[1]).slice(0, 8).forEach(([k, v]) => sysTable.push([k, v]));
-    calcSheet.getRange(1, 7, sysTable.length, 2).setValues(sysTable);
-
-    // --- C. DASHBOARD VISUAL ---
-    let dashSheet = ss.getSheetByName('Dashboard');
-    let isUpdateMode = false;
-
-    if (dashSheet) {
-      const check = dashSheet.getRange('B2').getValue();
-      const version = dashSheet.getRange('M32').getValue();
-      // Si el título coincide Y la versión es la actual, entramos en modo rápido
-      if (check === 'Dashboard Nutricional - Vista Ejecutiva' && version === 'V6.5') {
-        isUpdateMode = true;
-      } else {
-        dashSheet.clear(); // Si la versión es vieja o no existe, borrar para reconstruir con nuevas gráficas
-      }
-    } else {
-      dashSheet = ss.insertSheet('Dashboard');
-    }
-
-    const totalEval = data.length;
-    const avgScore = (processedData.slice(1).reduce((s, r) => s + r[1], 0) / totalEval).toFixed(0);
-
-    if (isUpdateMode) {
-       dashSheet.getRange('B6').setValue(totalEval);
-       dashSheet.getRange('E6').setValue(avgScore);
-       dashSheet.getRange('B32').setValue("Actualización Automática: " + new Date().toLocaleString());
-       return; // Los gráficos se refrescan solos
-    }
-
-    // MODO CONSTRUCCIÓN (Primera vez)
-    dashSheet.setHiddenGridlines(true);
-    [1,3,4,6,7,9,10,12].forEach(c => dashSheet.setColumnWidth(c, 25));
-    [2,5,8,11].forEach(c => dashSheet.setColumnWidth(c, 200));
-
-    dashSheet.getRange('B2:M3').merge().setValue('Dashboard Nutricional - Vista Ejecutiva')
-      .setHorizontalAlignment('center').setVerticalAlignment('middle')
-      .setFontFamily('Montserrat').setFontSize(20).setFontWeight('bold')
-      .setBackground('#0f172a').setFontColor('#ffffff');
-
-    createKpiCard(dashSheet, 'B', 5, 'Evaluaciones', totalEval, '#3b82f6');
-    createKpiCard(dashSheet, 'E', 5, 'Score Salud', avgScore, '#10b981');
-
-    // --- GRÁFICAS ---
-    
-    // 1. Restricciones por Unidad (Barras)
-    const chartBU = dashSheet.newChart()
-      .setChartType(Charts.ChartType.BAR)
-      .addRange(calcSheet.getRange(1, 1, buTable.length, 2))
-      .setPosition(10, 2, 0, 0)
-      .setOption('title', 'Restricciones por Unidad de Negocio')
-      .setOption('colors', ['#ef4444'])
-      .setOption('legend', {position: 'none'})
-      .setOption('width', 400).setOption('height', 300)
-      .build();
-    dashSheet.insertChart(chartBU);
-
-    // 2. Aptitud General (Dona)
-    const chartFit = dashSheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(calcSheet.getRange(1, 4, fitTable.length, 2))
-      .setPosition(10, 8, 0, 0)
-      .setOption('title', 'Estado de Aptitud Médica')
-      .setOption('pieHole', 0.5)
-      .setOption('colors', ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'])
-      .setOption('width', 400).setOption('height', 300)
-      .build();
-    dashSheet.insertChart(chartFit);
-
-    // 3. Sistemas con más Hallazgos (Barras)
-    const chartSys = dashSheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(calcSheet.getRange(1, 7, sysTable.length, 2))
-      .setPosition(27, 2, 0, 0)
-      .setOption('title', 'Top Hallazgos Clínicos (Paso 5)')
-      .setOption('colors', ['#6366f1'])
-      .setOption('legend', {position: 'none'})
-      .setOption('width', 850).setOption('height', 300)
-      .build();
-    dashSheet.insertChart(chartSys);
-
-    dashSheet.getRange('B32').setValue("Dashboard configurado el: " + new Date().toLocaleString());
-    dashSheet.getRange('M32').setValue("V6.5");
-  } catch(e) { /* Silencioso en guardado */ }
-}
-
-/**
- * Helper para crear tarjetas bonitas en celdas
- */
-function createKpiCard(sheet, colLetter, row, title, value, color) {
-  const range = sheet.getRange(`${colLetter}${row}:${String.fromCharCode(colLetter.charCodeAt(0)+2)}${row+2}`);
-  range.merge()
-       .setBackground('#ffffff')
-       .setBorder(true, true, true, true, null, null, '#cbd5e1', SpreadsheetApp.BorderStyle.SOLID)
-       .setHorizontalAlignment('center').setVerticalAlignment('middle');
-       
-  sheet.getRange(`${colLetter}${row}`).setValue(title).setFontSize(10).setFontWeight('bold').setFontColor('#64748b').setHorizontalAlignment('center');
-  sheet.getRange(`${colLetter}${row+1}`).setValue(value).setFontSize(28).setFontWeight('bold').setFontColor(color).setHorizontalAlignment('center');
-}
 
 // -----------------------------------------------------------
 // FUNCIONES AUXILIARES (Auth, AI, etc.) - RESTAURADAS COMPLETAS
@@ -857,8 +930,12 @@ function validateLogin(user, passHash) {
     if (dbUser === input || dbEmail === input) {
       if (row[1] === passHash) {
          const token = Utilities.getUuid();
+         // Obtenemos el Rol de la columna F (índice 5)
+         const userRole = row[5] || 'Usuario'; 
          CacheService.getScriptCache().put(token, row[0], 21600); 
-         return { success: true, token: token };
+         
+         // Devolvemos exitosamente con el Token y el Rol
+         return { success: true, token: token, role: userRole };
       } else {
          return { success: false, error: 'Contraseña incorrecta' };
       }
@@ -866,6 +943,7 @@ function validateLogin(user, passHash) {
   }
   return { success: false, error: 'Usuario no encontrado' };
 }
+
 
 function changePassword(user, oldHash, newHash) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();

@@ -605,5 +605,499 @@ function generateExcelReport() {
     XLSX.writeFile(wb, filename);
 }
 
+// ============================================
+// PREDEFINED REPORTS ENGINE
+// ============================================
+
+let selectedReportType = ''; // Stores the currently selected report type
+
+const REPORT_CONFIG = {
+    'General': {
+        title: 'Reporte General - Todos los Programas',
+        icon: '🌐',
+        color: '#3b82f6',
+        gradient: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+        filenamePrefix: 'Reporte_General'
+    },
+    'Cronico Degenerativos': {
+        title: 'Reporte: Crónico Degenerativos',
+        icon: '❤️',
+        color: '#ef4444',
+        gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
+        filenamePrefix: 'Reporte_Cronico_Degenerativos'
+    },
+    'Salud Ocupacional': {
+        title: 'Reporte: Salud Ocupacional',
+        icon: '🏭',
+        color: '#f59e0b',
+        gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+        filenamePrefix: 'Reporte_Salud_Ocupacional'
+    },
+    'Actividades restringidas': {
+        title: 'Reporte: Actividades Restringidas',
+        icon: '⚠️',
+        color: '#8b5cf6',
+        gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+        filenamePrefix: 'Reporte_Actividades_Restringidas'
+    },
+    'Brigadistas': {
+        title: 'Reporte: Brigadistas',
+        icon: '🚒',
+        color: '#06b6d4',
+        gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+        filenamePrefix: 'Reporte_Brigadistas'
+    },
+    'Nuevo ingreso': {
+        title: 'Reporte: Nuevo Ingreso',
+        icon: '🆕',
+        color: '#10b981',
+        gradient: 'linear-gradient(135deg, #10b981, #059669)',
+        filenamePrefix: 'Reporte_Nuevo_Ingreso'
+    },
+    'Ley Silla': {
+        title: 'Reporte: Ley Silla',
+        icon: '🪑',
+        color: '#86198f',
+        gradient: 'linear-gradient(135deg, #a21caf, #86198f)',
+        filenamePrefix: 'Reporte_Ley_Silla'
+    }
+};
+
+/**
+ * Filter dashboard data by a specific program.
+ * 'General' returns all records.
+ */
+function getRecordsByProgram(programName) {
+    if (programName === 'General') return dashboardData;
+    return dashboardData.filter(r =>
+        (r.programas || '').split(',').map(p => p.trim()).includes(programName)
+    );
+}
+
+/**
+ * Validate data quality for a set of records.
+ * Returns an object with quality metrics and warnings.
+ */
+function validateDataQuality(records) {
+    const total = records.length;
+    if (total === 0) return { total: 0, warnings: ['No hay registros para este programa.'], quality: 'empty' };
+
+    const warnings = [];
+    let missingIMC = 0, missingGlucosa = 0, missingPresion = 0, missingEdad = 0;
+
+    records.forEach(r => {
+        const imc = parseFloat(r.imc);
+        if (isNaN(imc) || imc <= 0) missingIMC++;
+        const glucosa = parseFloat(r.glucometria);
+        if (isNaN(glucosa) || glucosa <= 0) missingGlucosa++;
+        const sis = parseFloat(r.taSistolica);
+        const dia = parseFloat(r.taDiastolica);
+        if (isNaN(sis) || isNaN(dia) || sis <= 0 || dia <= 0) missingPresion++;
+        const edad = parseInt(r.edad);
+        if (isNaN(edad)) missingEdad++;
+    });
+
+    const pctIMC = ((missingIMC / total) * 100).toFixed(0);
+    const pctGlucosa = ((missingGlucosa / total) * 100).toFixed(0);
+    const pctPresion = ((missingPresion / total) * 100).toFixed(0);
+
+    if (pctIMC > 20) warnings.push(`⚠️ ${pctIMC}% sin datos de IMC`);
+    if (pctGlucosa > 20) warnings.push(`⚠️ ${pctGlucosa}% sin datos de Glucosa`);
+    if (pctPresion > 20) warnings.push(`⚠️ ${pctPresion}% sin datos de Presión Arterial`);
+
+    const quality = warnings.length === 0 ? 'good' : warnings.length <= 1 ? 'moderate' : 'low';
+
+    return { total, missingIMC, missingGlucosa, missingPresion, missingEdad, warnings, quality };
+}
+
+/**
+ * Generate multi-program analysis HTML for the General Report PDF.
+ */
+function generateMultiProgramAnalysisHTML(records) {
+    // Count programs per employee
+    const programCounts = { '1 programa': 0, '2 programas': 0, '3+ programas': 0 };
+    let totalProgramAssignments = 0;
+
+    records.forEach(r => {
+        const progs = (r.programas || '').split(',').map(p => p.trim()).filter(Boolean);
+        const count = progs.length;
+        totalProgramAssignments += count;
+        if (count <= 1) programCounts['1 programa']++;
+        else if (count === 2) programCounts['2 programas']++;
+        else programCounts['3+ programas']++;
+    });
+
+    const avgPrograms = records.length > 0 ? (totalProgramAssignments / records.length).toFixed(1) : '0';
+
+    // Identify complex cases (2+ programs AND high risk)
+    let complexCases = 0;
+    records.forEach(r => {
+        const progs = (r.programas || '').split(',').map(p => p.trim()).filter(Boolean);
+        if (progs.length >= 2 && classifyRiskLevel(r) === 'Alto') complexCases++;
+    });
+
+    return `
+        <div style="background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; page-break-inside: avoid;">
+            <h3 style="margin: 0 0 1rem; font-size: 1.1rem; color: #4c1d95;">📊 Análisis de Multi-Programas</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;">${avgPrograms}</div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Promedio de Programas / Empleado</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">${programCounts['2 programas'] + programCounts['3+ programas']}</div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Empleados con 2+ Programas</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #ef4444;">${complexCases}</div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Casos Complejos (Multi + Alto Riesgo)</div>
+                </div>
+            </div>
+            <p style="margin: 0; font-size: 0.85rem; color: #475569; background: white; padding: 0.75rem 1rem; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                Distribución: ${programCounts['1 programa']} con 1 programa, ${programCounts['2 programas']} con 2 programas, ${programCounts['3+ programas']} con 3 o más.
+            </p>
+        </div>
+    `;
+}
+
+/**
+ * Open the report format modal. Called when user clicks a report type.
+ * Auto-loads dashboardData if not available (when called from Expediente).
+ */
+async function openReportFormatModal(reportType) {
+    selectedReportType = reportType;
+    const config = REPORT_CONFIG[reportType];
+    if (!config) return;
+
+    // Auto-load dashboardData if not available (e.g., opened from Expediente, not Dashboard)
+    if (!dashboardData || dashboardData.length === 0) {
+        try {
+            const response = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'getDashboardData',
+                    token: sessionStorage.getItem('sessionToken')
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.records) {
+                dashboardData = result.records;
+            } else {
+                alert('Error cargando datos para el reporte: ' + (result.error || 'Desconocido'));
+                return;
+            }
+        } catch (err) {
+            console.error('Error loading data for report:', err);
+            alert('Error de conexión al cargar datos del reporte.');
+            return;
+        }
+    }
+
+    // Update modal header
+    const titleEl = document.getElementById('reportFormatTitle');
+    const subtitleEl = document.getElementById('reportFormatSubtitle');
+    const headerDiv = titleEl?.parentElement;
+
+    if (titleEl) titleEl.textContent = `${config.icon} ${config.title}`;
+    if (subtitleEl) subtitleEl.textContent = 'Selecciona el formato de exportación';
+    if (headerDiv) headerDiv.style.background = config.gradient;
+
+    // Calculate data quality preview
+    const records = getRecordsByProgram(reportType);
+    const quality = validateDataQuality(records);
+    const qualityEl = document.getElementById('reportQualityContent');
+
+    if (qualityEl) {
+        let html = `<strong>${quality.total}</strong> registros encontrados`;
+
+        if (quality.total > 0) {
+            const qualityBadge = quality.quality === 'good'
+                ? '<span style="color: #10b981; font-weight: 600;">✅ Calidad Alta</span>'
+                : quality.quality === 'moderate'
+                    ? '<span style="color: #f59e0b; font-weight: 600;">⚠️ Calidad Moderada</span>'
+                    : '<span style="color: #ef4444; font-weight: 600;">🔴 Calidad Baja</span>';
+
+            html += ` — ${qualityBadge}`;
+
+            if (quality.warnings.length > 0) {
+                html += '<br>' + quality.warnings.join('<br>');
+            }
+        }
+
+        qualityEl.innerHTML = html;
+    }
+
+    // Show modal
+    document.getElementById('reportFormatModal').style.display = 'flex';
+}
+
+function closeReportFormatModal() {
+    document.getElementById('reportFormatModal').style.display = 'none';
+    selectedReportType = '';
+}
+
+/**
+ * Execute the predefined report in the chosen format.
+ */
+async function executePredefinedReport(format) {
+    const reportType = selectedReportType;
+    const config = REPORT_CONFIG[reportType];
+    if (!config || !reportType) return;
+
+    closeReportFormatModal();
+
+    const records = getRecordsByProgram(reportType);
+    if (records.length === 0) {
+        alert('No hay registros para este programa. No se puede generar el reporte.');
+        return;
+    }
+
+    if (format === 'excel') {
+        generatePredefinedExcelReport(reportType, config, records);
+    } else {
+        await generatePredefinedPDFReport(reportType, config, records);
+    }
+}
+
+/**
+ * Generate a predefined Excel report.
+ */
+function generatePredefinedExcelReport(reportType, config, records) {
+    const dateStr = new Date().toISOString().split('T')[0];
+
+    // Prepare data with risk classification and complex case flag
+    const exportData = records.map(record => {
+        const progs = (record.programas || '').split(',').map(p => p.trim()).filter(Boolean);
+        return {
+            'No. Empleado': record.numEmpleado || '',
+            'Nombre': record.nombre || '',
+            'Género': record.genero || '',
+            'Edad': record.edad || '',
+            'Planta': record.planta || '',
+            'Área': record.area || '',
+            'Turno': record.turno || '',
+            'Peso (kg)': record.peso || '',
+            'Talla (cm)': record.talla || '',
+            'IMC': record.imc || '',
+            'Grasa Corporal (%)': record.fat || '',
+            'Masa Muscular (kg)': record.musc || '',
+            'Grasa Visceral': record.visc || '',
+            'TA Sistólica': record.taSistolica || '',
+            'TA Diastólica': record.taDiastolica || '',
+            'Glucosa': record.glucometria || '',
+            'Programas': record.programas || '',
+            'Nivel de Riesgo': classifyRiskLevel(record),
+            'Caso Complejo': progs.length >= 2 ? 'Sí' : 'No'
+        };
+    });
+
+    const wb = XLSX.utils.book_new();
+
+    // Main data sheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    ws['!cols'] = [
+        { wch: 12 }, { wch: 25 }, { wch: 10 }, { wch: 6 }, { wch: 15 },
+        { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 8 },
+        { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+        { wch: 10 }, { wch: 30 }, { wch: 15 }, { wch: 14 }
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+
+    // Summary sheet
+    const quality = validateDataQuality(records);
+    const summaryData = [
+        [config.title],
+        [''],
+        ['Reporte Generado', new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })],
+        ['Programa', reportType],
+        ['Total Registros', records.length],
+        [''],
+        ['Distribución por Nivel de Riesgo'],
+        ['Alto', records.filter(r => classifyRiskLevel(r) === 'Alto').length],
+        ['Medio', records.filter(r => classifyRiskLevel(r) === 'Medio').length],
+        ['Bajo', records.filter(r => classifyRiskLevel(r) === 'Bajo').length],
+        [''],
+        ['Calidad de Datos'],
+        ['Registros sin IMC', quality.missingIMC || 0],
+        ['Registros sin Glucosa', quality.missingGlucosa || 0],
+        ['Registros sin Presión Arterial', quality.missingPresion || 0],
+    ];
+
+    if (reportType === 'General') {
+        // Add multi-program analysis to summary
+        const programCounts = { '1 programa': 0, '2 programas': 0, '3+ programas': 0 };
+        records.forEach(r => {
+            const count = (r.programas || '').split(',').map(p => p.trim()).filter(Boolean).length;
+            if (count <= 1) programCounts['1 programa']++;
+            else if (count === 2) programCounts['2 programas']++;
+            else programCounts['3+ programas']++;
+        });
+        summaryData.push(['']);
+        summaryData.push(['Análisis Multi-Programa']);
+        summaryData.push(['Empleados con 1 programa', programCounts['1 programa']]);
+        summaryData.push(['Empleados con 2 programas', programCounts['2 programas']]);
+        summaryData.push(['Empleados con 3+ programas', programCounts['3+ programas']]);
+        summaryData.push(['Casos Complejos (Multi + Alto Riesgo)',
+            records.filter(r => {
+                const progs = (r.programas || '').split(',').map(p => p.trim()).filter(Boolean);
+                return progs.length >= 2 && classifyRiskLevel(r) === 'Alto';
+            }).length
+        ]);
+    }
+
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    wsSummary['!cols'] = [{ wch: 35 }, { wch: 30 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen');
+
+    const filename = `${config.filenamePrefix}_${dateStr}.xlsx`;
+    XLSX.writeFile(wb, filename);
+}
+
+/**
+ * Generate a predefined PDF report with all charts and interpretations.
+ */
+async function generatePredefinedPDFReport(reportType, config, records) {
+    // Show loading
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'pdfLoadingOverlay';
+    loadingOverlay.innerHTML = `
+        <div style="background: white; padding: 2rem 3rem; border-radius: 12px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: ${config.color}; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+            <p style="color: #1e293b; font-weight: 500;">Generando ${config.title}...</p>
+        </div>
+    `;
+    loadingOverlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 99999;';
+    document.body.appendChild(loadingOverlay);
+
+    const dateGenerated = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    const quality = validateDataQuality(records);
+
+    // Create PDF content
+    const pdfContainer = document.createElement('div');
+    pdfContainer.id = 'pdfExportContainer';
+    pdfContainer.style.cssText = 'width: 210mm; padding: 15mm; background: white; font-family: Inter, sans-serif; color: #1e293b;';
+
+    // Header
+    pdfContainer.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid ${config.color}; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div>
+                <h1 style="margin: 0; font-size: 1.5rem; color: #0b4f35;">${config.icon} ${config.title}</h1>
+                <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.85rem;">Generado: ${dateGenerated}</p>
+            </div>
+            <img src="EHS.png" alt="EHS Logo" style="height: 50px;">
+        </div>
+
+        <!-- Data Quality Alert -->
+        ${quality.warnings.length > 0 ? `
+        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem;">
+            <strong style="color: #92400e;">⚠️ Alertas de Calidad de Datos:</strong><br>
+            <span style="color: #78350f; font-size: 0.85rem;">${quality.warnings.join(' | ')}</span>
+        </div>
+        ` : ''}
+
+        <!-- Executive Summary -->
+        <div style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+            <h2 style="margin: 0 0 1rem; font-size: 1.1rem; color: #1e40af;">📊 Resumen Ejecutivo</h2>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+                ${generateExecutiveSummaryHTML(records)}
+            </div>
+            <p style="margin: 1rem 0 0; font-size: 0.85rem; color: #475569;">${generateComparativeIndicator(records)}</p>
+        </div>
+    `;
+
+    // Multi-program analysis (only for General report)
+    if (reportType === 'General') {
+        const multiProgramDiv = document.createElement('div');
+        multiProgramDiv.innerHTML = generateMultiProgramAnalysisHTML(records);
+        pdfContainer.appendChild(multiProgramDiv);
+    }
+
+    // Add all chart interpretations as text sections (since we can't render new charts for filtered data)
+    const interpretations = [
+        { title: 'Distribución de IMC', fn: generateIMCInterpretation },
+        { title: 'Distribución por Género', fn: generateGeneroInterpretation },
+        { title: 'Distribución de Glucosa', fn: generateGlucosaInterpretation },
+        { title: 'Distribución de Presión Arterial', fn: generatePresionInterpretation },
+        { title: 'Distribución por Edad', fn: generateEdadesInterpretation },
+        { title: 'Distribución por Turno', fn: generateTurnosInterpretation },
+        { title: 'Empleados por Planta', fn: generatePlantasInterpretation },
+        { title: 'Programas de Salud', fn: generateProgramasInterpretation },
+        { title: 'Principales Padecimientos', fn: generatePadecimientosInterpretation }
+    ];
+
+    // Try to capture existing chart images if the dashboard charts are rendered
+    const chartMappings = {
+        'Distribución de IMC': 'chartIMC',
+        'Distribución por Género': 'chartGenero',
+        'Distribución de Glucosa': 'chartGlucosa',
+        'Distribución de Presión Arterial': 'chartPresion',
+        'Distribución por Edad': 'chartEdades',
+        'Distribución por Turno': 'chartTurnos',
+        'Empleados por Planta': 'chartPlantas',
+        'Programas de Salud': 'chartProgramas',
+        'Principales Padecimientos': 'chartPadecimientos'
+    };
+
+    for (const interp of interpretations) {
+        const section = document.createElement('div');
+        section.style.cssText = 'margin-bottom: 1.5rem; page-break-inside: avoid;';
+
+        let chartImage = '';
+        const chartId = chartMappings[interp.title];
+        const chartInstance = window.chartInstances ? window.chartInstances[chartId] : null;
+
+        if (chartInstance) {
+            try {
+                const { imgURI } = await chartInstance.dataURI();
+                chartImage = `<div style="text-align: center; margin-bottom: 0.5rem;"><img src="${imgURI}" style="max-width: 100%; max-height: 250px;"></div>`;
+            } catch (e) {
+                console.warn(`Could not capture chart image for ${interp.title}`);
+            }
+        }
+
+        section.innerHTML = `
+            <h3 style="font-size: 1rem; color: ${config.color}; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 0.75rem;">${interp.title}</h3>
+            ${chartImage}
+            <p style="background: #f8fafc; border-left: 4px solid ${config.color}; padding: 0.75rem 1rem; font-size: 0.85rem; color: #475569; border-radius: 0 8px 8px 0; margin: 0;">
+                ${interp.fn(records)}
+            </p>
+        `;
+        pdfContainer.appendChild(section);
+    }
+
+    document.body.appendChild(pdfContainer);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    const opt = {
+        margin: 0,
+        filename: `${config.filenamePrefix}_${dateStr}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+        await html2pdf().set(opt).from(pdfContainer).save();
+    } catch (err) {
+        console.error('PDF generation error:', err);
+        alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+    }
+
+    // Cleanup
+    document.body.removeChild(pdfContainer);
+    document.body.removeChild(loadingOverlay);
+}
+
+
 // Initialize on DOM load
-document.addEventListener('DOMContentLoaded', initExportModule);
+document.addEventListener('DOMContentLoaded', () => {
+    initExportModule();
+
+    // Close reports dropdown when clicking outside
+    document.addEventListener('click', () => {
+        const reportsMenu = document.getElementById('reportsDropdownMenu');
+        if (reportsMenu) reportsMenu.classList.remove('show');
+    });
+});

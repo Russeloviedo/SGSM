@@ -147,6 +147,7 @@ function setSelectOrManual(selectId, inputId, value, manualOptionValue = 'Manual
 
 // --- DRAFT PERSISTENCE (Autosave) ---
 function saveDraft() {
+    window.Nutrition?.syncState();
     // No guardar si estamos en el paso 0 o en History
     if (activeStep === 0 || activeStep === 'History') return;
 
@@ -204,6 +205,7 @@ async function loadDraft() {
 
         // Reset Form first
         form.reset();
+        window.Nutrition?.restoreState(data.nutrition_state);
 
         // Fill form fields (named elements)
         for (const [key, value] of Object.entries(data)) {
@@ -221,7 +223,7 @@ async function loadDraft() {
                 });
             } else {
                 if (elements.type === 'checkbox' || elements.type === 'radio') {
-                    elements.checked = (value === elements.value || value === 'on');
+                    elements.checked = (Array.isArray(value) ? value.includes(elements.value) : (value === elements.value || value === 'on'));
                 } else {
                     elements.value = value;
                 }
@@ -595,61 +597,73 @@ function showHunterConfirm(title, msg, onConfirm) {
 
 // UI Helpers
 function checkPadecimientoOtros(select) {
+    if (!padecimientoInput) return;
     if (select.value === 'Otros') {
         padecimientoInput.style.display = 'block';
-        padecimientoInput.value = '';
-        padecimientoInput.focus();
     } else {
         padecimientoInput.style.display = 'none';
+        padecimientoInput.value = '';
     }
 }
 
 function checkAreaManual(select) {
+    if (!areaInput) return;
     if (select.value === 'Manual') {
         areaInput.style.display = 'block';
-        areaInput.value = '';
-        areaInput.focus();
         areaInput.required = true;
     } else {
         areaInput.style.display = 'none';
         areaInput.required = false;
+        areaInput.value = '';
     }
 }
 
 function checkPuestoManual(select) {
+    if (!puestoInput) return;
     if (select.value === 'Manual') {
         puestoInput.style.display = 'block';
-        puestoInput.value = '';
-        puestoInput.focus();
         puestoInput.required = true;
     } else {
         puestoInput.style.display = 'none';
         puestoInput.required = false;
+        puestoInput.value = '';
     }
 }
 
 function checkSupervisorManual(select) {
     const input = document.getElementById('supervisor');
+    if (!input) return;
     if (select.value === 'Personalizar') {
         input.style.display = 'block';
-        input.value = '';
-        input.focus();
         input.required = true;
     } else {
         input.style.display = 'none';
         input.required = false;
+        input.value = '';
     }
 }
 
 function checkTurnoManual(select) {
+    if (!turnoInput) return;
     if (select.value === 'Manual') {
         turnoInput.style.display = 'block';
-        turnoInput.value = '';
-        turnoInput.focus();
         turnoInput.required = true;
     } else {
         turnoInput.style.display = 'none';
         turnoInput.required = false;
+        turnoInput.value = '';
+    }
+}
+
+function checkEstadoCivilManual(select) {
+    const input = document.getElementById('estadoCivil');
+    if (!select || !input) return;
+    if (select.value === 'Otro') {
+        input.style.display = 'block';
+        input.required = true;
+    } else {
+        input.style.display = 'none';
+        input.required = false;
     }
 }
 
@@ -697,37 +711,141 @@ function toggleAlta() {
 }
 
 // --- NAVIGATION LOGIC (Conditional Branching) ---
-const PROGRAM_REQUIREMENTS = {
-    // Todos los programas ahora siguen el flujo completo (0-7)
-    'DEFAULT': [0, 1, 2, 3, 4, 5, 6, 7],
-
-    /* Lógica original preservada para referencia futura:
-    'Control de embarazo': [2, 3, 4, 7],
-    'Control de niño sano': [2, 3, 4, 7],
-    'Cronico Degenerativos': [2, 3, 4, 7],
-    'Nuevo ingreso': [2, 3, 4, 5, 7],
-    'Salud Ocupacional': [2, 3, 4, 5, 7],
-    'Brigadistas': [2, 4, 7],
-    'Actividades restringidas': [2, 3, 6, 7]
-    */
+const PROGRAM_CONFIG = {
+    'Consulta Nutricional': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 7],
+        hiddenSections: ['descripcion_cargo', 'vacunas', 'patologias', 'riesgos', 'ley_silla', 'funciones_puesto']
+    },
+    'Consulta general': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 7],
+        hiddenSections: ['ley_silla']
+    },
+    'Cronico Degenerativos': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 7],
+        hiddenSections: ['riesgos', 'vacunas', 'evaluacion_integral', 'descripcion_cargo', 'ley_silla']
+    },
+    'Salud Ocupacional': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 7],
+        hiddenSections: ['ley_silla']
+    },
+    'Actividades restringidas': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 6, 7],
+        hiddenSections: ['padecimientos', 'antropometria', 'otros_signos', 'vacunas', 'riesgos', 'actividades_adicionales', 'evaluacion_integral', 'descripcion_cargo', 'ley_silla']
+    },
+    'Brigadistas': {
+        enabledSteps: [0, 1, 2, 3, 4, 7], // Skip 5 and 6
+        hiddenSections: ['funciones_puesto', 'descripcion_cargo', 'ley_silla']
+    },
+    'Nuevo ingreso': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 7],
+        hiddenSections: ['riesgos', 'actividades_adicionales', 'ley_silla']
+    },
+    'Ley Silla': {
+        enabledSteps: [0, 1, 2, 3, 4, 5, 7],
+        hiddenSections: []
+    }
 };
 
 function getEnabledSteps() {
-    // Ahora todos los programas usan todos los pasos por defecto
-    return [0, 1, 2, 3, 4, 5, 6, 7];
-
-    /* Lógica dinámica original:
-    const enabled = new Set([0, 1]);
-    if (!programasSelected || programasSelected.size === 0) {
-        enabled.add(2);
-    } else {
-        programasSelected.forEach(p => {
-            const steps = PROGRAM_REQUIREMENTS[p];
-            if (steps) steps.forEach(s => enabled.add(s));
-        });
+    if (typeof programasSelected === 'undefined' || !programasSelected || programasSelected.size === 0) {
+        return [0, 1];
     }
+    
+    let enabled = new Set([0, 1]);
+    programasSelected.forEach(p => {
+        const config = PROGRAM_CONFIG[p];
+        if (config && config.enabledSteps) {
+            config.enabledSteps.forEach(s => enabled.add(s));
+        }
+    });
+    
     return Array.from(enabled).sort((a, b) => a - b);
-    */
+}
+
+function getHiddenSections() {
+    if (typeof programasSelected === 'undefined' || !programasSelected || programasSelected.size === 0) {
+        return [];
+    }
+    
+    let hiddenArrays = [];
+    programasSelected.forEach(p => {
+        const config = PROGRAM_CONFIG[p];
+        if (config && config.hiddenSections) {
+            hiddenArrays.push(config.hiddenSections);
+        }
+    });
+    
+    if (hiddenArrays.length === 0) return [];
+    
+    let intersection = hiddenArrays[0];
+    for (let i = 1; i < hiddenArrays.length; i++) {
+        intersection = intersection.filter(x => hiddenArrays[i].includes(x));
+    }
+    return intersection;
+}
+
+function updateSectionsVisibility() {
+    const hiddenSections = getHiddenSections();
+    const allSections = document.querySelectorAll('[data-section]');
+    
+    allSections.forEach(sec => {
+        const secName = sec.getAttribute('data-section');
+        if (secName === 'gineco') return; // Manejado por toggleGinecoFields
+        
+        if (hiddenSections.includes(secName)) {
+            sec.style.display = 'none';
+            // Disable inputs within hidden section so they don't block validation
+            const inputs = sec.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.disabled = true);
+        } else {
+            if (sec.classList.contains('grid-2') || sec.classList.contains('grid-3')) {
+                sec.style.display = 'grid';
+            } else {
+                sec.style.display = 'block';
+            }
+            // Re-enable inputs
+            const inputs = sec.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.disabled = false);
+        }
+    });
+    
+    if (typeof toggleGinecoFields === 'function') toggleGinecoFields();
+    window.Nutrition?.applyVisibility();
+}
+
+function renderDynamicProgressBar(enabledSteps, currentStep) {
+    const container = document.getElementById('dynamicProgressBar');
+    if (!container) return;
+    
+    if (currentStep === 'History') {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    enabledSteps.forEach((step, index) => {
+        const stepNum = Number(step);
+        
+        const stepDiv = document.createElement('div');
+        stepDiv.className = 'progress-step';
+        stepDiv.setAttribute('data-step', stepNum);
+        stepDiv.textContent = stepNum;
+        
+        if (stepNum <= currentStep) {
+            stepDiv.classList.add('active');
+        }
+        container.appendChild(stepDiv);
+        
+        if (index < enabledSteps.length - 1) {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'progress-line';
+            if (currentStep >= enabledSteps[index + 1]) {
+                lineDiv.classList.add('filled');
+            }
+            container.appendChild(lineDiv);
+        }
+    });
 }
 
 function getNextStep(current) {
@@ -824,28 +942,11 @@ function showStep(stepNumber) {
         setTimeout(triggerAiSuggestion, 300);
     }
 
-    // Progress Bar
-    if (Number.isNaN(Number(stepNumber)) && stepNumber === 'History') {
-        // No update logic for history
-    } else {
-        document.querySelectorAll('.progress-step').forEach(el => {
-            const step = parseInt(el.getAttribute('data-step'));
-            if (step <= stepNumber) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
-        });
+    // Update visibility of internal sections based on program
+    updateSectionsVisibility();
 
-        // Animate progress lines (fill completed ones)
-        document.querySelectorAll('.progress-line').forEach((line, index) => {
-            if (index < stepNumber) {
-                line.classList.add('filled');
-            } else {
-                line.classList.remove('filled');
-            }
-        });
-    }
+    // Progress Bar (Dynamic)
+    renderDynamicProgressBar(enabledSteps, stepNumber);
 }
 
 function goBackFromStep1() {
@@ -986,15 +1087,21 @@ function removePrograma(val) {
 function renderProgramaTags() {
     const container = document.getElementById('programasTags');
     const hiddenInput = document.getElementById('programasList');
+    if (!container) return;
     container.innerHTML = '';
     const list = Array.from(programasSelected);
     hiddenInput.value = list.join(', ');
     list.forEach(item => {
         const tag = document.createElement('div');
         tag.style.cssText = `background-color:#dcfce7;color:#166534;padding:4px 10px;border-radius:16px;display:flex;align-items:center;gap:6px;font-size:0.85rem;border:1px solid #bbf7d0;`;
-        tag.innerHTML = `${item}<span onclick="removePrograma('${item}')" style="cursor: pointer; font-weight: bold; color: #15803d;">&times;</span>`;
+        tag.innerHTML = `${item}<span onclick="removePrograma('${item}')" style="cursor: pointer; font-weight: bold; color: #15803d; margin-left: 4px;">&times;</span>`;
         container.appendChild(tag);
     });
+
+    // Reactivity: update UI immediately
+    updateSectionsVisibility();
+    const enabledSteps = getEnabledSteps();
+    renderDynamicProgressBar(enabledSteps, activeStep);
 }
 
 let patologiasSelected = new Set();
@@ -1068,31 +1175,117 @@ function showToast(message, type = 'info') {
 // REST Interface (Optimistic)
 function handleFormSubmit(e) {
     e.preventDefault();
-    const btn = document.getElementById('submitBtn');
+    if (window.Nutrition && !window.Nutrition.validate()) return;
 
-    // 1. Gather Data & Snapshot State
-    const formData = new FormData(form);
+    // 🛡️ GUARD: Prevent accidental submission from Step 0 (Search screen)
+    if (activeStep === 0 || activeStep === 'History') {
+        console.warn("⚠️ Submission blocked: User is still on Step 0 or History.");
+        return;
+    }
+
+    // Auto-trigger any selected dropdown items before gathering data
+    for (let i = 1; i <= 3; i++) {
+        const selectEl = document.getElementById(`exposicion_select_${i}`);
+        if (selectEl && selectEl.value) {
+            addExposureRisk(i);
+        }
+    }
+    const eppSelectEl = document.getElementById('epp_select');
+    if (eppSelectEl && eppSelectEl.value) {
+        addEPPItem();
+    }
+
+    // 1. Gather Data & Snapshot State (Capture ALL form elements, including disabled/hidden fields)
     const data = {};
-    formData.forEach((value, key) => data[key] = value);
+    const allInputs = form.querySelectorAll('input, select, textarea');
+    allInputs.forEach(el => {
+        if (!el.name) return;
+
+        if (el.type === 'checkbox') {
+            if (!data[el.name]) data[el.name] = [];
+            if (el.checked) data[el.name].push(el.value);
+        } else if (el.type === 'radio') {
+            if (el.checked) data[el.name] = el.value;
+        } else {
+            data[el.name] = el.value;
+        }
+    });
+
+    // Join array checkboxes into strings if any
+    Object.keys(data).forEach(k => {
+        if (Array.isArray(data[k])) {
+            data[k] = data[k].join(', ');
+        }
+    });
+
+    // Explicitly Capture Exposure Risks for Blocks 1, 2, 3
+    for (let i = 1; i <= 3; i++) {
+        const list = document.getElementById(`exposureList_${i}`);
+        if (list) {
+            list.querySelectorAll('div').forEach(row => {
+                const hiddenFlag = row.querySelector('input[type="hidden"]');
+                const txtDetail = row.querySelector('input[type="text"]');
+                if (hiddenFlag && hiddenFlag.name) {
+                    data[hiddenFlag.name] = 'SI';
+                }
+                if (txtDetail && txtDetail.name) {
+                    data[txtDetail.name] = txtDetail.value;
+                }
+            });
+        }
+    }
+
+    // Explicitly Capture EPP Lista
+    const eppSelected = [];
+    document.querySelectorAll('#eppList > div').forEach(div => {
+        const txtInput = div.querySelector('input[type="text"]');
+        if (txtInput && txtInput.value.trim() !== '') {
+            eppSelected.push(txtInput.value.trim());
+        } else {
+            const hiddenVal = div.querySelector('input.epp-item-val');
+            if (hiddenVal && hiddenVal.value) {
+                eppSelected.push(hiddenVal.value);
+            }
+        }
+    });
+    data.epp_lista = eppSelected.join(', ');
 
     // Manual Overrides
-    const estadoCivilSelectVal = document.getElementById('estadoCivilSelect').value;
-    data.estadoCivil = (estadoCivilSelectVal === 'Otro') ? document.getElementById('estadoCivil').value : estadoCivilSelectVal;
+    const estadoCivilSelectEl = document.getElementById('estadoCivilSelect');
+    if (estadoCivilSelectEl) {
+        const val = estadoCivilSelectEl.value;
+        data.estadoCivil = (val === 'Otro') ? (document.getElementById('estadoCivil')?.value || '') : val;
+    }
 
-    const padSelectVal = padecimientoSelect.value;
-    data.padecimiento = (padSelectVal === 'Otros') ? document.getElementById('padecimiento').value : padSelectVal;
+    const padSelectEl = document.getElementById('padecimientoSelect');
+    if (padSelectEl) {
+        const val = padSelectEl.value;
+        data.padecimiento = (val === 'Otros') ? (document.getElementById('padecimiento')?.value || '') : val;
+    }
 
-    const supervisorSelectVal = document.getElementById('supervisorSelect').value;
-    data.supervisor = (supervisorSelectVal === 'Personalizar') ? document.getElementById('supervisor').value : supervisorSelectVal;
+    const supervisorSelectEl = document.getElementById('supervisorSelect');
+    if (supervisorSelectEl) {
+        const val = supervisorSelectEl.value;
+        data.supervisor = (val === 'Personalizar') ? (document.getElementById('supervisor')?.value || '') : val;
+    }
 
-    const areaSelectVal = areaSelect.value;
-    data.area = (areaSelectVal === 'Manual') ? areaInput.value : areaSelectVal;
+    const areaSelectEl = document.getElementById('areaSelect');
+    if (areaSelectEl) {
+        const val = areaSelectEl.value;
+        data.area = (val === 'Manual') ? (document.getElementById('area')?.value || '') : val;
+    }
 
-    const puestoSelectVal = puestoSelect.value;
-    data.puesto = (puestoSelectVal === 'Manual') ? puestoInput.value : puestoSelectVal;
+    const puestoSelectEl = document.getElementById('puestoSelect');
+    if (puestoSelectEl) {
+        const val = puestoSelectEl.value;
+        data.puesto = (val === 'Manual') ? (document.getElementById('puesto')?.value || '') : val;
+    }
 
-    const turnoSelectVal = turnoSelect.value;
-    data.turno = (turnoSelectVal === 'Manual') ? turnoInput.value : turnoSelectVal;
+    const turnoSelectEl = document.getElementById('turnoSelect');
+    if (turnoSelectEl) {
+        const val = turnoSelectEl.value;
+        data.turno = (val === 'Manual') ? (document.getElementById('turno')?.value || '') : val;
+    }
 
     // Habitos
     const habitosSeleccionados = [];
@@ -1110,7 +1303,7 @@ function handleFormSubmit(e) {
     data.patologiasLista = document.getElementById('patologiasLista').value;
     data.programasList = document.getElementById('programasList').value;
 
-    ['riesgosQuimicos', 'riesgosFisicos', 'riesgosErgonomicos', 'riesgosMetabolicos', 'riesgosBiologicos'].forEach(name => {
+    ['riesgosQuimicos', 'riesgosFisicos', 'riesgosErgonomicos', 'riesgosMetabolicos', 'riesgosBiologicos', 'leysilla_int', 'leysilla_exp'].forEach(name => {
         const checked = [];
         document.querySelectorAll(`input[name="${name}"]:checked`).forEach(cb => checked.push(cb.value));
         data[name] = checked.join(', ');
@@ -1179,6 +1372,12 @@ function handleFormSubmit(e) {
     });
     data.evaluacionData = JSON.stringify(evaluacionItems);
 
+    data.notas = window.Nutrition ? window.Nutrition.serializeNotes(data.notas || '') : data.notas;
+    Object.keys(data).filter(key => key.startsWith('nut_') || key === 'nutrition_state').forEach(key => delete data[key]);
+    if ((data.notas || '').length > 48000) {
+        showHunterModal('Información extensa', 'El anexo nutricional supera el espacio disponible. Reduzca los comentarios antes de guardar.', 'error');
+        return;
+    }
     const payload = {
         ...data,
         action: currentAction,
@@ -1235,29 +1434,10 @@ function searchEmployee() {
     const btn = document.querySelector('#step0 button');
     const originalText = btn.textContent;
 
-    const cachedData = localStorage.getItem('hunter_cache_' + searchId);
-    let cacheUsed = false;
-
-    if (cachedData) {
-        try {
-            const parsed = JSON.parse(cachedData);
-            if (parsed.found && parsed.results && parsed.results.length > 0) {
-                renderHistory(parsed.results, true);
-                showStep('History');
-                cacheUsed = true;
-            } else if (parsed.found && parsed.data) {
-                startNewRecord(parsed.data);
-                cacheUsed = true;
-            }
-        } catch (e) {
-            localStorage.removeItem('hunter_cache_' + searchId);
-        }
-    }
-
-    if (!cacheUsed) {
-        btn.disabled = true;
-        btn.innerHTML = "Buscando... <span style='font-size:0.8em'></span>";
-    }
+    // Always perform live search to ensure up-to-date DB lookup
+    localStorage.removeItem('hunter_cache_' + searchId);
+    btn.disabled = true;
+    btn.innerHTML = "Buscando... <span style='font-size:0.8em'></span>";
 
     fetch(CONFIG.API_URL, {
         method: "POST",
@@ -1281,24 +1461,22 @@ function searchEmployee() {
                 localStorage.removeItem('hunter_cache_' + searchId);
             }
 
+            if (res.error || res.success === false) {
+                showHunterModal("Error en Búsqueda", res.error || "No se pudo realizar la búsqueda en el servidor.", "error");
+                return;
+            }
+
             if (res.found && res.results && res.results.length > 0) {
                 renderHistory(res.results);
                 showStep('History');
             } else if (res.found && res.data) {
                 startNewRecord(res.data);
             } else {
-                if (cacheUsed && !res.found) {
-                    alert("⚠️ El registro fue eliminado en el servidor.");
-                    startNewRecord(null);
-                    return;
-                }
-                if (!cacheUsed) {
-                    showHunterConfirm(
-                        "Empleado no encontrado",
-                        `¿Deseas registrar un NUEVO empleado con ID <strong>${searchId}</strong>?`,
-                        () => startNewRecord(null)
-                    );
-                }
+                showHunterConfirm(
+                    "Empleado no encontrado",
+                    `¿Deseas registrar un NUEVO empleado con ID <strong>${searchId}</strong>?`,
+                    () => startNewRecord(null)
+                );
             }
         })
         .catch(error => {
@@ -1441,18 +1619,33 @@ function renderHistory(results, fromCache = false) {
     grid.className = 'history-grid';
 
     results.forEach((item, index) => {
-        const dateObj = new Date(item.date);
-        const dateStrRaw = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const dateStrRaw = formatReportDate(item, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         const dateStr = dateStrRaw.charAt(0).toUpperCase() + dateStrRaw.slice(1);
         const peso = item.data.peso ? `${item.data.peso} kg` : '--';
         const imc = (item.data.imc !== undefined && item.data.imc !== '') ? item.data.imc : '--';
+
+        const programasRaw = item.data.programasList || ''; // El FIELD_MAP dice 'programasList': 'Programas'
+        const primerPrograma = programasRaw.split(',')[0].trim() || 'General';
+        let badgeClass = 'badge-default';
+        if (primerPrograma.toLowerCase().includes('nutrici')) badgeClass = 'badge-nutricion';
+        if (primerPrograma.toLowerCase().includes('diabete')) badgeClass = 'badge-diabetes';
+        if (primerPrograma.toLowerCase().includes('hipertensi')) badgeClass = 'badge-hipertension';
+
+        const creadoTxt = formatReportDate(item);
+        let editadoTxt = '';
+        if (item.data.fecha_actualizacion) {
+             const actual = parseReportDate(item.data.fecha_actualizacion);
+             if (actual) { // Si existe una fecha válida
+                editadoTxt = ` | 🔄 Editado: ${formatReportDate(actual)}`;
+             }
+        }
 
         const card = document.createElement('div');
         card.className = 'history-card';
         card.innerHTML = `
             <div class="history-header">
-                <div class="history-date">
-                    <span class="history-date-value">${dateStr}</span>
+                <div class="history-date ${badgeClass}" style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 0.6rem 1.5rem; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 99px; transition: all 0.3s ease;">
+                    <span class="history-date-value" style="color: inherit; font-size: 0.95rem;">${primerPrograma}</span>
                 </div>
             </div>
             <div class="history-data-grid">
@@ -1460,6 +1653,9 @@ function renderHistory(results, fromCache = false) {
                 <div class="data-cell data-imc"><span class="data-label">IMC</span><span class="data-value">${imc}</span></div>
                 <div class="data-cell data-presion"><span class="data-label">Presión</span><span class="data-value">${item.data.taSistolica || '--'}/${item.data.taDiastolica || '--'}</span></div>
                 <div class="data-cell data-glucosa"><span class="data-label">Glucosa</span><span class="data-value">${item.data.glucometria || '--'}</span></div>
+            </div>
+            <div style="margin-top: 15px; padding-top: 8px; border-top: 1px solid #f1f5f9; font-size: 0.70rem; color: #94a3b8; text-align: center; display: flex; justify-content: center; gap: 4px;">
+                <span title="Creación">🕒 Creado: ${creadoTxt}</span><span style="font-weight:600">${editadoTxt}</span>
             </div>`;
         card.onclick = () => loadRecordForEdit(item);
         grid.appendChild(card);
@@ -1473,7 +1669,7 @@ function renderHistory(results, fromCache = false) {
 
     container.appendChild(grid);
 
-    // Reports Section
+    // Keep only the complete individual evaluation report.
     const reportsSection = document.createElement('div');
     reportsSection.style.marginTop = '3rem';
     reportsSection.innerHTML = `
@@ -1483,7 +1679,11 @@ function renderHistory(results, fromCache = false) {
                 <span style="font-size:1.5rem;">📄</span>
                 <div><span style="display:block; font-weight:600;">Expediente Completo</span><span style="display:block; font-size:0.8rem; color:#64748b;">Descargar PDF</span></div>
             </button>
-        </div>`; // Simplified
+            <button type="button" onclick="openPDFModal('Consulta Nutricional')" class="pdf-btn">
+                <span style="font-size:1.5rem;">🥗</span>
+                <div><span style="display:block; font-weight:600;">Reporte de Consulta Nutricional</span><span style="display:block; font-size:0.8rem; color:#64748b;">Descargar PDF del programa</span></div>
+            </button>
+        </div>`;
     container.appendChild(reportsSection);
 }
 
@@ -1511,6 +1711,7 @@ function setDateValue(id, val) {
 }
 
 function startNewRecord(preFillData = null) {
+    window.Nutrition?.clear();
     if (!form) return;
     form.reset();
     currentAction = 'save';
@@ -1551,7 +1752,7 @@ function startNewRecord(preFillData = null) {
     if (preFillData) {
         document.getElementById('num').value = preFillData.num || currentSearchId || '';
         if (preFillData.nombre) document.getElementById('nombre').value = preFillData.nombre;
-        setSelectOrManual('genero', null, preFillData.genero, null);
+        setSelectOrManual('genero', null, preFillData.genero || preFillData['Género'], null);
         if (preFillData.edad) document.getElementById('edad').value = preFillData.edad;
         if (preFillData.contacto) document.getElementById('contacto').value = preFillData.contacto;
         if (preFillData.lugarNacimiento) document.getElementById('lugarNacimiento').value = preFillData.lugarNacimiento;
@@ -1604,6 +1805,19 @@ function loadRecordForEdit(record) {
     currentRowIndex = record.rowIndex;
     const data = record.data;
 
+    // 🔧 FIX CRITICAL: startNewRecord -> showStep(1) disables all inputs in Steps 4-7.
+    // We MUST temporarily enable ALL form inputs before restoring data.
+    document.querySelectorAll('.form-step input, .form-step select, .form-step textarea').forEach(el => {
+        el.disabled = false;
+    });
+
+    // 🔧 FIX: Ensure Gineco container visibility matches restored patient gender
+    if (typeof toggleGinecoFields === 'function') {
+        toggleGinecoFields();
+    }
+
+    console.log("📋 loadRecordForEdit - Full data keys:", Object.keys(data));
+
     // Restore Array Data
     if (data.programasList) {
         String(data.programasList).split(',').forEach(item => {
@@ -1629,6 +1843,61 @@ function loadRecordForEdit(record) {
         renderPatologiasTags();
     }
 
+    // --- Restore Historia Ocupacional Dinámica (v4 - Multi-Riesgo) ---
+    const RISK_TYPES_RESTORE = ['quimicos', 'fisicos', 'carga_fisica', 'ergonomicos', 'epp'];
+    const RISK_LABELS = { 'quimicos': 'Químicos', 'fisicos': 'Físicos', 'carga_fisica': 'Carga Física', 'ergonomicos': 'Ergonómicos', 'epp': 'EPP' };
+    let visibleBlocks = 1;
+    for (let i = 1; i <= 3; i++) {
+        const empresaVal = data[`historial_empresa_${i}`] || '';
+        const ocupacionVal = data[`historial_ocupacion_${i}`] || '';
+        const tiempoVal = data[`historial_tiempo_${i}`] || '';
+        const elEmpresa = document.getElementById(`historial_empresa_${i}`);
+        const elOcupacion = document.getElementById(`historial_ocupacion_${i}`);
+        const elTiempo = document.getElementById(`historial_tiempo_${i}`);
+        if (elEmpresa) elEmpresa.value = empresaVal;
+        if (elOcupacion) elOcupacion.value = ocupacionVal;
+        if (elTiempo) elTiempo.value = tiempoVal;
+        const list = document.getElementById(`exposureList_${i}`);
+        if (list) list.innerHTML = '';
+        RISK_TYPES_RESTORE.forEach(riskKey => {
+            const flag = String(data[`expo_${riskKey}_${i}`] || '').trim();
+            const detailVal = String(data[`expo_${riskKey}_${i}_detalle`] || '').trim();
+            
+            const isSI = (flag.toUpperCase() === 'SI' || flag.toUpperCase() === 'YES' || flag.toUpperCase() === 'ON' || flag === 'true' || flag === '1');
+            const hasDetail = (detailVal !== '' && detailVal !== 'N/A' && detailVal.toLowerCase() !== 'undefined');
+
+            if (isSI || hasDetail) {
+                const label = RISK_LABELS[riskKey] || riskKey;
+                _addExposureRiskRow(i, riskKey, label, (detailVal === 'N/A') ? '' : detailVal);
+            }
+        });
+        if (i > 1 && (empresaVal !== '' && empresaVal !== 'N/A' || ocupacionVal !== '' && ocupacionVal !== 'N/A')) visibleBlocks = i;
+    }
+    for (let i = 2; i <= 3; i++) {
+        const block = document.getElementById(`job_block_${i}`);
+        if (block) block.style.display = (i <= visibleBlocks) ? 'block' : 'none';
+    }
+    const btnAdd = document.getElementById('btnAddJob');
+    if (btnAdd) btnAdd.style.display = (visibleBlocks >= 3) ? 'none' : 'inline-flex';
+
+    // --- Restore EPP ---
+    const eppListEl = document.getElementById('eppList');
+    if (eppListEl) eppListEl.innerHTML = '';
+    const rawEpp = data.epp_lista || data.epp || data.eppUtilizado || '';
+    if (rawEpp && rawEpp !== 'N/A' && String(rawEpp).trim() !== '') {
+        const eppItems = String(rawEpp).split(/[,;]+/);
+        const knownEPP = ['Botas', 'Cascos', 'Lentes', 'Tapones de oído'];
+        eppItems.forEach(rawItem => {
+            const item = rawItem.trim();
+            if (!item || item === 'N/A') return;
+            if (knownEPP.includes(item)) {
+                _addEPPRow(item, false, '');
+            } else {
+                _addEPPRow('Otros', true, item);
+            }
+        });
+    }
+
     // Restore Medical
     document.getElementById('peso').value = data.peso || '';
     document.getElementById('talla').value = data.talla || '';
@@ -1644,8 +1913,6 @@ function loadRecordForEdit(record) {
     document.getElementById('oximetria').value = data.oximetria || '';
     document.getElementById('glucometria').value = data.glucometria || '';
     document.getElementById('temperatura').value = data.temperatura || '';
-    if (data.habito_Medicamentos_Cantidad) document.getElementById('habito_Medicamentos_Cantidad').value = data.habito_Medicamentos_Cantidad;
-    if (data.habito_Medicamentos_Frecuencia) document.getElementById('habito_Medicamentos_Frecuencia').value = data.habito_Medicamentos_Frecuencia;
 
     // --- Hydrate Step 6 (Restricted Activities) ---
     if (data.restr_enfermedad_general) document.getElementById('restr_enfermedad_general').value = data.restr_enfermedad_general;
@@ -1665,8 +1932,8 @@ function loadRecordForEdit(record) {
         btnAlta.style.border = '1px solid #059669';
     }
 
-    if (data.restr_fecha_inicio) document.getElementById('restr_fecha_inicio').value = data.restr_fecha_inicio;
-    if (data.restr_fecha_termino) document.getElementById('restr_fecha_termino').value = data.restr_fecha_termino;
+    setDateValue('restr_fecha_inicio', data.restr_fecha_inicio);
+    setDateValue('restr_fecha_termino', data.restr_fecha_termino);
     if (data.restr_motivo) document.getElementById('restr_motivo').value = data.restr_motivo;
     if (data.restr_region_afectada) document.getElementById('restr_region_afectada').value = data.restr_region_afectada;
     if (data.restr_otros) document.getElementById('restr_otros').value = data.restr_otros;
@@ -1683,16 +1950,13 @@ function loadRecordForEdit(record) {
     document.getElementById('agudezaAuditiva').value = data.agudezaAuditiva || '';
 
     // Restore AHF / Vacunas
-    const ahfFields = ['ahf_diabetes', 'ahf_hipertension', 'ahf_cancer', 'ahf_cardiopatias'];
-    ['ahf_diabetes', 'ahf_hipertension', 'ahf_cancer', 'ahf_cardiopatias', 'vacuna_tetanos', 'vacuna_influenza', 'vacuna_hepatitis'].forEach(id => {
+    ['ahf_diabetes', 'ahf_hipertension', 'ahf_cancer', 'ahf_cardiopatias', 'ahf_psiquiatricos', 'ahf_epilepticos', 'ahf_alergias', 'ahf_asma', 'vacuna_tetanos', 'vacuna_influenza', 'vacuna_hepatitis'].forEach(id => {
         const el = document.querySelector(`input[name="${id}"]`);
         if (el) {
             const wasChecked = (data[id] === 'SI' || data[id] === 'on' || data[id] === true);
             el.checked = wasChecked;
-            // Si es un AHF y está marcado, disparar toggleAHF para crear el input
             if (id.startsWith('ahf_') && id !== 'ahf_otros' && wasChecked) {
-                toggleAHF(el);
-                // Rellenar el detalle si existe
+                if (typeof toggleAHF === 'function') toggleAHF(el);
                 const detalleId = id + '_detalle';
                 const detalleInput = document.getElementById(detalleId);
                 if (detalleInput && data[detalleId]) {
@@ -1704,6 +1968,18 @@ function loadRecordForEdit(record) {
     document.getElementById('ahf_otros').value = data.ahf_otros || '';
     document.getElementById('alergia_medicamentos').value = data.alergia_medicamentos || '';
 
+    // Restore Ley Silla checkboxes
+    const restoreCheckboxesByName = (listStr, name) => {
+        if (!listStr) return;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(inp => {
+            if (String(listStr).includes(inp.value)) {
+                inp.checked = true;
+            }
+        });
+    };
+    restoreCheckboxesByName(data.leysilla_int, 'leysilla_int');
+    restoreCheckboxesByName(data.leysilla_exp, 'leysilla_exp');
+
     // Restore Aptitud
     const aptSelect = document.getElementById('aptitud_medica');
     if (aptSelect) {
@@ -1714,17 +1990,7 @@ function loadRecordForEdit(record) {
     setDateValue('seguimiento_fecha', data.seguimiento_fecha);
 
     if (data.antecedentes) document.getElementById('antecedentes').value = data.antecedentes;
-    document.getElementById('musc').value = data.musc || '';
-    document.getElementById('visc').value = data.visc || '';
-    document.getElementById('bodyage').value = data.bodyage || '';
-    document.getElementById('rmi').value = data.rmi || '';
-    document.getElementById('taSistolica').value = data.taSistolica || '';
-    document.getElementById('taDiastolica').value = data.taDiastolica || '';
-    document.getElementById('pulso').value = data.pulso || '';
-    document.getElementById('oximetria').value = data.oximetria || '';
-    document.getElementById('glucometria').value = data.glucometria || '';
-    document.getElementById('temperatura').value = data.temperatura || '';
-    document.getElementById('notas').value = data.notas || '';
+    document.getElementById('notas').value = window.Nutrition ? window.Nutrition.restoreNotes(data.notas || '') : (data.notas || '');
 
     // Restore Padecimiento Select
     const pSelect = document.getElementById('padecimientoSelect');
@@ -1760,6 +2026,115 @@ function loadRecordForEdit(record) {
     restoreCheckboxes(data.riesgosMetabolicos, 'tabMetabolicos');
     restoreCheckboxes(data.riesgosBiologicos, 'tabBiologicos');
 
+    // --- Restore Gynecological Data (Section 4) ---
+    if (data.gineco_menarca || data.gineco_fum || data.gineco_gestas) {
+        const gContainer = document.getElementById('antecedentesGinecoContainer');
+        if (gContainer) {
+            gContainer.style.display = 'block';
+            gContainer.style.opacity = '1';
+            gContainer.querySelectorAll('input, select').forEach(inp => { inp.disabled = false; });
+        }
+    }
+    const ginecoFields = ['gineco_menarca', 'gineco_gestas', 'gineco_partos', 'gineco_cesareas', 'gineco_abortos'];
+    ginecoFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && data[id] && data[id] !== 'N/A') el.value = data[id];
+    });
+    setDateValue('gineco_fum', data.gineco_fum);
+    setDateValue('gineco_papanicolau', data.gineco_papanicolau);
+    setDateValue('gineco_mastografia', data.gineco_mastografia);
+    const planificacionEl = document.getElementById('gineco_planificacion');
+    if (planificacionEl && data.gineco_planificacion && data.gineco_planificacion !== 'N/A') {
+        planificacionEl.value = data.gineco_planificacion;
+    }
+
+    // --- Restore Habits Details (Alcohol, Tabaco, Drogas) ---
+    const habitTypes = ['Alcohol', 'Tabaco', 'Drogas', 'Medicamentos'];
+    habitTypes.forEach(type => {
+        const tipoKey = `habito_${type}_Tipo`;
+        const cantidadKey = `habito_${type}_Cantidad`;
+        const frecuenciaKey = `habito_${type}_Frecuencia`;
+        if (data[tipoKey] || data[cantidadKey] || data[frecuenciaKey]) {
+            const checkbox = document.querySelector(`input[value="${type}"]`);
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                toggleHabito(checkbox);
+            }
+            setTimeout(() => {
+                const tipoEl = document.querySelector(`input[name="${tipoKey}"]`);
+                const cantEl = document.querySelector(`input[name="${cantidadKey}"]`);
+                const freqEl = document.querySelector(`input[name="${frecuenciaKey}"]`);
+                if (tipoEl && data[tipoKey] && data[tipoKey] !== 'N/A') tipoEl.value = data[tipoKey];
+                if (cantEl && data[cantidadKey] && data[cantidadKey] !== 'N/A') cantEl.value = data[cantidadKey];
+                if (freqEl && data[frecuenciaKey] && data[frecuenciaKey] !== 'N/A') freqEl.value = data[frecuenciaKey];
+            }, 50);
+        }
+    });
+
+    // --- Restore New Step 5 Fields (Activities, Sport, etc.) ---
+    if (data.oficio_externo && data.oficio_externo !== 'N/A') {
+        const el = document.getElementById('oficio_externo');
+        if (el) el.value = data.oficio_externo;
+    }
+    if (data.ortopedico && data.ortopedico !== 'N/A') {
+        const el = document.getElementById('ortopedico');
+        if (el) el.value = data.ortopedico;
+    }
+    // --- Restore Dynamic Exploración & Evaluación Items (Step 5.6) ---
+    const expList = document.getElementById('exploracionList');
+    if (expList) expList.innerHTML = '';
+    if (data.exploracionData && data.exploracionData !== 'N/A') {
+        try {
+            const expItems = typeof data.exploracionData === 'string' ? JSON.parse(data.exploracionData) : data.exploracionData;
+            if (Array.isArray(expItems)) {
+                expItems.forEach(item => {
+                    const label = item.item || item.label || '';
+                    const detail = item.detalle || item.value || '';
+                    if (label) {
+                        const div = document.createElement('div');
+                        div.id = `row_exp_${label}`;
+                        div.style.cssText = "display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0;";
+                        div.innerHTML = `
+                            <strong style="min-width: 140px; color: #334155;">${label}:</strong>
+                            <input type="text" placeholder="Observación..." value="${detail}" required style="flex-grow: 1; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">&times;</button>
+                        `;
+                        expList.appendChild(div);
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Could not parse exploracionData:", e);
+        }
+    }
+
+    const evalList = document.getElementById('evaluacionList');
+    if (evalList) evalList.innerHTML = '';
+    if (data.evaluacionData && data.evaluacionData !== 'N/A') {
+        try {
+            const evalItems = typeof data.evaluacionData === 'string' ? JSON.parse(data.evaluacionData) : data.evaluacionData;
+            if (Array.isArray(evalItems)) {
+                evalItems.forEach(item => {
+                    const label = item.item || item.label || '';
+                    const detail = item.detalle || item.value || '';
+                    if (label) {
+                        const div = document.createElement('div');
+                        div.id = `row_eval_${label}`;
+                        div.style.cssText = "display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0;";
+                        div.innerHTML = `
+                            <strong style="min-width: 140px; color: #334155;">${label}:</strong>
+                            <input type="text" placeholder="Observación..." value="${detail}" required style="flex-grow: 1; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">&times;</button>
+                        `;
+                        evalList.appendChild(div);
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Could not parse evaluacionData:", e);
+        }
+    }
+
     showStep(1);
 }
 
@@ -1775,16 +2150,19 @@ function closeReferenciasModal() { document.getElementById('referenciasModal').s
 
 // 1. Toggle Gineco
 function toggleGinecoFields() {
-    const genero = document.getElementById('genero').value;
+    const generoEl = document.getElementById('genero');
+    const genero = generoEl ? generoEl.value : '';
     const container = document.getElementById('antecedentesGinecoContainer');
+    if(!container) return;
     const inputs = container.querySelectorAll('input, select');
+    const hiddenSections = getHiddenSections();
+    const isHiddenByProgram = hiddenSections.includes('gineco');
 
-    if (genero === 'Femenino') {
+    if (genero === 'Femenino' && !isHiddenByProgram) {
         container.style.display = 'block';
         container.style.opacity = '1';
         inputs.forEach(input => input.disabled = false);
     } else {
-        // No es Femenino -> Ocultar completamente
         container.style.display = 'none';
         inputs.forEach(input => {
             input.disabled = true;
@@ -1891,6 +2269,107 @@ function addEvaluacionItem() {
     select.value = "";
 }
 
+// 1.3 Exposicion Multi-Riesgo (Historia Ocupacional v4)
+const RISK_KEY_MAP = {
+    'Químicos': 'quimicos',
+    'Físicos': 'fisicos',
+    'Carga Física': 'carga_fisica',
+    'Ergonómicos': 'ergonomicos',
+    'EPP': 'epp'
+};
+
+function addExposureRisk(jobIndex) {
+    const select = document.getElementById(`exposicion_select_${jobIndex}`);
+    const val = select.value;
+    if (!val) return;
+
+    const riskKey = RISK_KEY_MAP[val];
+    if (!riskKey) return;
+
+    const list = document.getElementById(`exposureList_${jobIndex}`);
+    if (document.getElementById(`expo_${riskKey}_${jobIndex}_row`)) {
+        select.value = '';
+        alert('Ya agregaste ese factor de riesgo.');
+        return;
+    }
+
+    _addExposureRiskRow(jobIndex, riskKey, val, '');
+    select.value = '';
+}
+
+function _addExposureRiskRow(jobIndex, riskKey, label, detailValue) {
+    const list = document.getElementById(`exposureList_${jobIndex}`);
+    if (!list) return;
+
+    const div = document.createElement('div');
+    div.id = `expo_${riskKey}_${jobIndex}_row`;
+    div.style.cssText = 'display: flex; gap: 0.5rem; align-items: center; background: #fdf4ff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #f5d0fe;';
+    div.innerHTML = `
+        <strong style="min-width: 120px; color: #86198f;">${label}:</strong>
+        <input type="hidden" name="expo_${riskKey}_${jobIndex}" value="SI">
+        <input type="text" name="expo_${riskKey}_${jobIndex}_detalle" id="expo_${riskKey}_${jobIndex}_detalle" placeholder="Detalle de exposición..." value="${detailValue}" style="flex-grow: 1; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+        <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">&times;</button>
+    `;
+    list.appendChild(div);
+}
+
+function addJobBlock() {
+    for (let i = 2; i <= 3; i++) {
+        const block = document.getElementById(`job_block_${i}`);
+        if (block && block.style.display === 'none') {
+            block.style.display = 'block';
+            if (i === 3) {
+                const btn = document.getElementById('btnAddJob');
+                if (btn) btn.style.display = 'none';
+            }
+            return;
+        }
+    }
+}
+
+// 1.4 EPP (Equipo de Protección Personal)
+function addEPPItem() {
+    const select = document.getElementById('epp_select');
+    const val = select.value;
+    if (!val) return;
+
+    const isOtros = (val === 'Otros');
+    const list = document.getElementById('eppList');
+
+    if (!isOtros && document.getElementById(`epp_row_${val}`)) {
+        select.value = '';
+        alert('Ya agregaste ese EPP.');
+        return;
+    }
+
+    _addEPPRow(val, isOtros, '');
+    select.value = '';
+}
+
+function _addEPPRow(label, isOtros, detailValue) {
+    const list = document.getElementById('eppList');
+    if (!list) return;
+
+    const div = document.createElement('div');
+    div.id = isOtros ? `epp_row_otros_${Date.now()}` : `epp_row_${label}`;
+    div.style.cssText = 'display: flex; gap: 0.5rem; align-items: center; background: #ecfdf5; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #a7f3d0;';
+
+    if (isOtros) {
+        div.innerHTML = `
+            <strong style="min-width: 80px; color: #065f46;">Otros:</strong>
+            <input type="text" name="epp_otros_item" id="epp_otros_detalle" placeholder="Especifique EPP..." value="${detailValue}" style="flex-grow: 1; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">&times;</button>
+        `;
+    } else {
+        div.innerHTML = `
+            <strong style="flex-grow: 1; color: #065f46;">✓ ${label}</strong>
+            <input type="hidden" class="epp-item-val" value="${label}">
+            <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">&times;</button>
+        `;
+    }
+    list.appendChild(div);
+}
+
 // Inicializar estado al cargar
 document.addEventListener('DOMContentLoaded', () => {
     // Si ya hay género seleccionado (ej. edición), validar estado inicial
@@ -1899,8 +2378,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Dashboard Update Logic (F5 Behavior with Persistence)
-function triggerDashboardUpdate() {
-    sessionStorage.setItem('openDashboardOnLoad', 'true');
-    window.location.reload();
+// Dashboard Update Logic — Fetch fresh data from backend and re-render charts
+async function triggerDashboardUpdate() {
+    const btn = event ? event.target : null;
+    const originalText = btn ? btn.textContent : 'Actualizar Gráficas';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '🔄 Actualizando...';
+        btn.style.opacity = '0.7';
+    }
+
+    try {
+        // Clear cached dashboard data so loadDashboardData fetches fresh records
+        dashboardData = [];
+        await loadDashboardData();
+
+        if (btn) {
+            btn.textContent = '✅ Actualizado';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }, 1500);
+        }
+    } catch (err) {
+        console.error("Error actualizando gráficas:", err);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+            btn.style.opacity = '1';
+        }
+    }
 }

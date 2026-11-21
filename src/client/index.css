@@ -1870,3 +1870,47 @@ button[type="submit"]:active {
         transform: rotate(360deg);
     }
 }
+
+/* --- PROGRAM BADGES HISTORY --- */
+.history-card { 
+    position: relative !important; 
+    padding-bottom: 2.5rem !important;
+}
+
+.program-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.badge-nutricion { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.badge-diabetes { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+.badge-hipertension { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.badge-ocupacional { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.badge-default { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+.history-footer-audit {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    text-align: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
+    margin: 0 15px;
+}
+
+.history-footer-audit span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}

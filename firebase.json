@@ -11,6 +11,10 @@
     ],
     "rewrites": [
       {
+        "source": "/supervisores",
+        "destination": "/src/client/supervisores.html"
+      },
+      {
         "source": "**",
         "destination": "/src/client/index.html"
       }

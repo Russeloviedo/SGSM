@@ -1,0 +1,1016 @@
+[
+  {
+    "key": "intentos_inicio",
+    "title": "Intentos anteriores para cambiar el peso",
+    "target": "#step2",
+    "fields": [
+      {
+        "key": "previos",
+        "label": "¿Ha intentado cambiar su peso anteriormente?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "No",
+          "Sí",
+          "No recuerda"
+        ]
+      }
+    ],
+    "help": "",
+    "repeat": false
+  },
+  {
+    "key": "intentos",
+    "title": "Antecedentes de intentos de cambio de peso",
+    "target": "#step2",
+    "fields": [
+      {
+        "key": "objetivo",
+        "label": "Objetivo del intento",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Bajar peso",
+          "Subir peso",
+          "Mejorar composición corporal"
+        ]
+      },
+      {
+        "key": "fecha",
+        "label": "Fecha aproximada",
+        "type": "month",
+        "help": "Deje vacío si no recuerda."
+      },
+      {
+        "key": "metodos",
+        "label": "Métodos utilizados",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Cambios de alimentación",
+          "Ejercicio",
+          "Asesoría profesional",
+          "Medicamentos",
+          "Suplementos",
+          "Cirugía",
+          "Otro"
+        ]
+      },
+      {
+        "key": "metodo_otro",
+        "label": "Otro método",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "duracion",
+        "label": "Duración",
+        "type": "number",
+        "help": ""
+      },
+      {
+        "key": "unidad",
+        "label": "Unidad de duración",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Semanas",
+          "Meses",
+          "Años"
+        ]
+      },
+      {
+        "key": "resultado",
+        "label": "Resultado",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Bajó",
+          "Subió",
+          "Se mantuvo",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "kg",
+        "label": "Cambio aproximado (kg)",
+        "type": "decimal",
+        "help": ""
+      },
+      {
+        "key": "mantuvo",
+        "label": "¿Mantuvo el resultado?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Sí",
+          "Parcialmente",
+          "No",
+          "Sigue en proceso"
+        ]
+      },
+      {
+        "key": "dificultades",
+        "label": "Dificultades",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Hambre",
+          "Horarios",
+          "Costo",
+          "Preparación",
+          "Estrés",
+          "Falta de apoyo",
+          "Malestar",
+          "Otra"
+        ]
+      },
+      {
+        "key": "comentarios",
+        "label": "Qué funcionó, dificultades adicionales o qué desea evitar",
+        "type": "textarea",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": true,
+    "when": {
+      "key": "intentos_inicio.previos",
+      "value": "Sí"
+    }
+  },
+  {
+    "key": "laboral",
+    "title": "Alimentación durante la jornada",
+    "target": "#step3",
+    "fields": [
+      {
+        "key": "horario",
+        "label": "Tipo de horario",
+        "type": "select",
+        "help": "Permite adaptar la distribución de comidas.",
+        "options": [
+          "Fijo",
+          "Rotativo",
+          "Variable"
+        ]
+      },
+      {
+        "key": "entrada",
+        "label": "Hora de entrada",
+        "type": "time",
+        "help": ""
+      },
+      {
+        "key": "salida",
+        "label": "Hora de salida",
+        "type": "time",
+        "help": ""
+      },
+      {
+        "key": "dias",
+        "label": "Días de trabajo",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Lunes",
+          "Martes",
+          "Miércoles",
+          "Jueves",
+          "Viernes",
+          "Sábado",
+          "Domingo"
+        ]
+      },
+      {
+        "key": "traslado",
+        "label": "Traslado por trayecto (minutos)",
+        "type": "number",
+        "help": ""
+      },
+      {
+        "key": "fuera",
+        "label": "¿Puede comer fuera del descanso?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Sí",
+          "No",
+          "Depende de la operación"
+        ]
+      },
+      {
+        "key": "origen",
+        "label": "Dónde obtiene los alimentos",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Lleva comida",
+          "Comedor",
+          "Compra fuera",
+          "Máquina expendedora",
+          "Otro"
+        ]
+      },
+      {
+        "key": "recursos",
+        "label": "Recursos disponibles",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Refrigerador",
+          "Microondas",
+          "Agua potable",
+          "Espacio para comer",
+          "Ninguno"
+        ]
+      },
+      {
+        "key": "actividad",
+        "label": "Actividad durante la jornada",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Principalmente sentado",
+          "De pie",
+          "Caminando",
+          "Esfuerzo físico",
+          "Mixta"
+        ]
+      }
+    ],
+    "help": "Complementa el turno laboral existente para proponer comidas que sí pueda realizar.",
+    "repeat": false
+  },
+  {
+    "key": "descansos",
+    "title": "Descansos para comer",
+    "target": "#step3",
+    "fields": [
+      {
+        "key": "hora",
+        "label": "Hora aproximada",
+        "type": "time",
+        "help": ""
+      },
+      {
+        "key": "duracion",
+        "label": "Duración (minutos)",
+        "type": "number",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": true
+  },
+  {
+    "key": "medidas",
+    "title": "Historia de peso y objetivos",
+    "target": "#step4",
+    "fields": [
+      {
+        "key": "habitual",
+        "label": "Peso habitual (kg)",
+        "type": "decimal",
+        "help": ""
+      },
+      {
+        "key": "cambio",
+        "label": "Cambio reciente de peso",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Bajó",
+          "Subió",
+          "Sin cambio",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "cantidad",
+        "label": "Magnitud del cambio (kg)",
+        "type": "decimal",
+        "help": "",
+        "when": {
+          "key": "medidas.cambio",
+          "values": [
+            "Bajó",
+            "Subió"
+          ]
+        }
+      },
+      {
+        "key": "tiempo",
+        "label": "Tiempo en que ocurrió",
+        "type": "number",
+        "help": "",
+        "when": {
+          "key": "medidas.cambio",
+          "values": [
+            "Bajó",
+            "Subió"
+          ]
+        }
+      },
+      {
+        "key": "unidad",
+        "label": "Unidad de tiempo",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Semanas",
+          "Meses"
+        ],
+        "when": {
+          "key": "medidas.cambio",
+          "values": [
+            "Bajó",
+            "Subió"
+          ]
+        }
+      },
+      {
+        "key": "intencional",
+        "label": "¿El cambio fue intencional?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Sí",
+          "No",
+          "Parcialmente",
+          "No sabe"
+        ],
+        "when": {
+          "key": "medidas.cambio",
+          "values": [
+            "Bajó",
+            "Subió"
+          ]
+        }
+      },
+      {
+        "key": "cintura",
+        "label": "Circunferencia de cintura (cm)",
+        "type": "decimal",
+        "help": ""
+      },
+      {
+        "key": "objetivos",
+        "label": "Objetivo principal",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Reducir grasa",
+          "Ganar músculo",
+          "Mantener peso",
+          "Mejorar alimentación",
+          "Apoyar control de un padecimiento",
+          "Otro"
+        ]
+      },
+      {
+        "key": "meta",
+        "label": "Meta acordada",
+        "type": "textarea",
+        "help": ""
+      },
+      {
+        "key": "peso_meta",
+        "label": "Peso objetivo (kg), opcional",
+        "type": "decimal",
+        "help": ""
+      },
+      {
+        "key": "revision",
+        "label": "Fecha para revisar la meta",
+        "type": "date",
+        "help": ""
+      },
+      {
+        "key": "condiciones",
+        "label": "Condiciones de medición",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Comió recientemente",
+          "Entrenó recientemente",
+          "Ropa o equipo adicional",
+          "Otra",
+          "No registrado"
+        ]
+      },
+      {
+        "key": "condiciones_detalle",
+        "label": "Detalles de las condiciones de medición",
+        "type": "textarea",
+        "help": ""
+      }
+    ],
+    "help": "Se conservan el peso, talla, composición corporal y signos vitales ya disponibles. No es necesario volver a capturarlos aquí.",
+    "repeat": false
+  },
+  {
+    "key": "familia",
+    "title": "Detalle de antecedentes familiares",
+    "target": "#step5 [data-section=\"ahf\"]",
+    "fields": [
+      {
+        "key": "padecimiento",
+        "label": "Padecimiento familiar",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "familiar",
+        "label": "Familiar",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Madre",
+          "Padre",
+          "Hermano/a",
+          "Abuelo/a",
+          "Hijo/a",
+          "Otro",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "detalle",
+        "label": "Detalle, si lo conoce",
+        "type": "textarea",
+        "help": ""
+      }
+    ],
+    "help": "Complementa las casillas de antecedentes heredofamiliares existentes.",
+    "repeat": true
+  },
+  {
+    "key": "antecedentes",
+    "title": "Antecedentes relacionados con la alimentación",
+    "target": "#step5 [data-section=\"evaluacion_integral\"]",
+    "fields": [
+      {
+        "key": "diagnosticos",
+        "label": "Detalle de enfermedades diagnosticadas",
+        "type": "textarea",
+        "help": "Complemente Padecimiento / Condición del paso anterior; no repita lo ya capturado."
+      },
+      {
+        "key": "alergia",
+        "label": "¿Tiene alergias alimentarias?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "No",
+          "Sí",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "alergia_detalle",
+        "label": "Alimento y reacción alérgica",
+        "type": "textarea",
+        "help": "",
+        "when": {
+          "key": "antecedentes.alergia",
+          "value": "Sí"
+        }
+      },
+      {
+        "key": "intolerancia",
+        "label": "¿Tiene intolerancias o alimentos que le causan malestar?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "No",
+          "Sí",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "intolerancia_detalle",
+        "label": "Alimento y síntomas",
+        "type": "textarea",
+        "help": "",
+        "when": {
+          "key": "antecedentes.intolerancia",
+          "value": "Sí"
+        }
+      },
+      {
+        "key": "cirugia",
+        "label": "¿Tiene cirugías relevantes para su alimentación?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "No",
+          "Sí",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "cirugia_detalle",
+        "label": "Tipo y fecha aproximada de cirugía",
+        "type": "textarea",
+        "help": "",
+        "when": {
+          "key": "antecedentes.cirugia",
+          "value": "Sí"
+        }
+      },
+      {
+        "key": "digestivos",
+        "label": "Síntomas digestivos",
+        "type": "checks",
+        "help": "",
+        "options": [
+          "Reflujo",
+          "Dolor",
+          "Distensión",
+          "Náuseas",
+          "Estreñimiento",
+          "Diarrea",
+          "Ninguno"
+        ]
+      },
+      {
+        "key": "frecuencia",
+        "label": "Frecuencia de los síntomas",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Ocasional",
+          "Semanal",
+          "Diaria",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "relacion",
+        "label": "Relación con alimentos u horarios",
+        "type": "textarea",
+        "help": ""
+      },
+      {
+        "key": "evacuaciones",
+        "label": "Frecuencia de evacuaciones",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Más de 3 al día",
+          "1 a 3 al día",
+          "Cada 2 días",
+          "Cada 3 días o más",
+          "Variable",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "bristol",
+        "label": "Consistencia de evacuaciones: escala de Bristol",
+        "type": "bristol",
+        "help": ""
+      },
+      {
+        "key": "digestivo_notas",
+        "label": "Comentarios digestivos",
+        "type": "textarea",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": false
+  },
+  {
+    "key": "medicamentos",
+    "title": "Medicamentos actuales",
+    "target": "#step5 [data-section=\"evaluacion_integral\"]",
+    "fields": [
+      {
+        "key": "nombre",
+        "label": "Nombre",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "dosis",
+        "label": "Dosis, si la conoce",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "frecuencia",
+        "label": "Frecuencia",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "horario",
+        "label": "Horario o relación con comidas",
+        "type": "text",
+        "help": ""
+      }
+    ],
+    "help": "Deje la lista vacía si no consume o no se evaluó; aclare el caso en Notas.",
+    "repeat": true
+  },
+  {
+    "key": "suplementos",
+    "title": "Suplementos actuales",
+    "target": "#step5 [data-section=\"evaluacion_integral\"]",
+    "fields": [
+      {
+        "key": "producto",
+        "label": "Producto",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "cantidad",
+        "label": "Cantidad y unidad",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "frecuencia",
+        "label": "Frecuencia",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "motivo",
+        "label": "Motivo de uso",
+        "type": "text",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": true
+  },
+  {
+    "key": "laboratorios",
+    "title": "Estudios de laboratorio disponibles",
+    "target": "#step5 [data-section=\"evaluacion_integral\"]",
+    "fields": [
+      {
+        "key": "fecha",
+        "label": "Fecha del estudio",
+        "type": "date",
+        "help": ""
+      },
+      {
+        "key": "estudio",
+        "label": "Estudio",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Glucosa",
+          "HbA1c",
+          "Colesterol total",
+          "LDL",
+          "HDL",
+          "Triglicéridos",
+          "Otro"
+        ]
+      },
+      {
+        "key": "otro",
+        "label": "Nombre del otro estudio",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "resultado",
+        "label": "Resultado",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "unidad",
+        "label": "Unidad",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "referencia",
+        "label": "Intervalo de referencia del laboratorio",
+        "type": "text",
+        "help": ""
+      }
+    ],
+    "help": "Opcional. Registre únicamente resultados disponibles, con sus unidades; no se requiere un estudio para terminar la consulta.",
+    "repeat": true
+  },
+  {
+    "key": "comidas",
+    "title": "Un día habitual de alimentación",
+    "target": "#step5 [data-section=\"actividades_adicionales\"]",
+    "fields": [
+      {
+        "key": "momento",
+        "label": "Comida o momento",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "hora",
+        "label": "Hora aproximada",
+        "type": "time",
+        "help": ""
+      },
+      {
+        "key": "alimentos",
+        "label": "Alimentos y bebidas",
+        "type": "textarea",
+        "help": ""
+      },
+      {
+        "key": "cantidad",
+        "label": "Cantidad aproximada",
+        "type": "text",
+        "help": "Puede usar piezas, tazas, vasos o porciones."
+      },
+      {
+        "key": "lugar",
+        "label": "Lugar donde come",
+        "type": "text",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": true
+  },
+  {
+    "key": "habitos",
+    "title": "Preferencias y organización de la alimentación",
+    "target": "#step5 [data-section=\"actividades_adicionales\"]",
+    "fields": [
+      {
+        "key": "descanso",
+        "label": "¿Come diferente en días de descanso?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Sí",
+          "No",
+          "No sabe"
+        ]
+      },
+      {
+        "key": "diferencias",
+        "label": "Cambios en días de descanso",
+        "type": "textarea",
+        "help": "",
+        "when": {
+          "key": "habitos.descanso",
+          "value": "Sí"
+        }
+      },
+      {
+        "key": "favoritos",
+        "label": "Alimentos favoritos",
+        "type": "textarea",
+        "help": ""
+      },
+      {
+        "key": "evita",
+        "label": "Alimentos que evita y motivo",
+        "type": "textarea",
+        "help": ""
+      },
+      {
+        "key": "compra",
+        "label": "¿Quién compra los alimentos?",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "cocina",
+        "label": "¿Quién prepara los alimentos?",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "preparacion",
+        "label": "Tiempo para preparar alimentos (minutos al día)",
+        "type": "number",
+        "help": ""
+      },
+      {
+        "key": "presupuesto",
+        "label": "Presupuesto semanal aproximado (MXN), opcional",
+        "type": "decimal",
+        "help": ""
+      },
+      {
+        "key": "personas",
+        "label": "Personas que cubre el presupuesto",
+        "type": "number",
+        "help": ""
+      },
+      {
+        "key": "agua",
+        "label": "Agua al día",
+        "type": "decimal",
+        "help": ""
+      },
+      {
+        "key": "agua_unidad",
+        "label": "Unidad del agua",
+        "type": "select",
+        "help": "",
+        "options": [
+          "ml",
+          "Litros"
+        ]
+      },
+      {
+        "key": "hambre_antes",
+        "label": "Hambre antes de comer (0 = ninguna; 10 = máxima)",
+        "type": "scale",
+        "help": ""
+      },
+      {
+        "key": "saciedad",
+        "label": "Saciedad después de comer (0 = ninguna; 10 = máxima)",
+        "type": "scale",
+        "help": ""
+      },
+      {
+        "key": "hambre_hora",
+        "label": "Horario de mayor hambre",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "antojos",
+        "label": "Frecuencia de antojos",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Nunca",
+          "Ocasional",
+          "Semanal",
+          "Diaria",
+          "Prefiere no responder"
+        ]
+      },
+      {
+        "key": "emociones",
+        "label": "¿Come relacionado con estrés u otras emociones?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "No",
+          "A veces",
+          "Frecuentemente",
+          "Prefiere no responder"
+        ]
+      },
+      {
+        "key": "detonantes",
+        "label": "Situaciones que lo desencadenan, opcional",
+        "type": "textarea",
+        "help": ""
+      },
+      {
+        "key": "control",
+        "label": "¿Ha sentido pérdida de control al comer?",
+        "type": "select",
+        "help": "",
+        "options": [
+          "No",
+          "Sí",
+          "No sabe",
+          "Prefiere no responder"
+        ]
+      },
+      {
+        "key": "control_detalle",
+        "label": "Comentarios sobre la alimentación, opcional",
+        "type": "textarea",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": false
+  },
+  {
+    "key": "bebidas",
+    "title": "Otras bebidas",
+    "target": "#step5 [data-section=\"actividades_adicionales\"]",
+    "fields": [
+      {
+        "key": "tipo",
+        "label": "Bebida",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Refresco",
+          "Bebida energética",
+          "Café",
+          "Té",
+          "Jugo",
+          "Alcohol",
+          "Otra"
+        ]
+      },
+      {
+        "key": "cantidad",
+        "label": "Cantidad",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "unidad",
+        "label": "Unidad o tamaño de la porción",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "frecuencia",
+        "label": "Frecuencia",
+        "type": "text",
+        "help": ""
+      }
+    ],
+    "help": "El consumo de alcohol complementa Hábitos Nocivos; no sustituye ese antecedente.",
+    "repeat": true
+  },
+  {
+    "key": "actividad",
+    "title": "Movimiento, descanso y estrés",
+    "target": "#step5 [data-section=\"actividades_adicionales\"]",
+    "fields": [
+      {
+        "key": "ejercicio",
+        "label": "Tipo de ejercicio o actividad",
+        "type": "text",
+        "help": ""
+      },
+      {
+        "key": "dias",
+        "label": "Días por semana",
+        "type": "days",
+        "help": ""
+      },
+      {
+        "key": "minutos",
+        "label": "Minutos por sesión",
+        "type": "number",
+        "help": ""
+      },
+      {
+        "key": "sentado",
+        "label": "Horas sentado al día",
+        "type": "hours",
+        "help": ""
+      },
+      {
+        "key": "dormir",
+        "label": "Hora habitual de dormir",
+        "type": "time",
+        "help": ""
+      },
+      {
+        "key": "despertar",
+        "label": "Hora habitual de despertar",
+        "type": "time",
+        "help": ""
+      },
+      {
+        "key": "sueno",
+        "label": "Horas aproximadas de sueño",
+        "type": "hours",
+        "help": ""
+      },
+      {
+        "key": "calidad",
+        "label": "Calidad del sueño",
+        "type": "select",
+        "help": "",
+        "options": [
+          "Buena",
+          "Regular",
+          "Mala",
+          "No evaluado"
+        ]
+      },
+      {
+        "key": "estres",
+        "label": "Estrés percibido (0 = ninguno; 10 = máximo)",
+        "type": "scale",
+        "help": ""
+      },
+      {
+        "key": "causa",
+        "label": "Principal causa de estrés, opcional",
+        "type": "textarea",
+        "help": ""
+      }
+    ],
+    "help": "",
+    "repeat": false
+  }
+]

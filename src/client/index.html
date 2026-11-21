@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="es">
 
@@ -96,6 +96,7 @@
     <!-- Lucide Icons for a modern look -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+<link rel="stylesheet" href="/src/client/nutrition.css?v=1">
 </head>
 
 
@@ -310,38 +311,8 @@
 
             <!-- Indicador de pasos opcional -->
 
-            <div class="progress-bar">
-
-                <div class="progress-step active" data-step="0">0</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="1">1</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="2">2</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="3">3</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="4">4</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="5">5</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="6">6</div>
-
-                <div class="progress-line"></div>
-
-                <div class="progress-step" data-step="7">7</div>
-
+            <!-- La barra de progreso se genera dinámicamente en app.js -->
+            <div class="progress-bar" id="dynamicProgressBar">
             </div>
 
         </header>
@@ -372,7 +343,8 @@
 
                     <input type="text" id="searchId" placeholder="Ingresa tu número"
                         style="font-size: 1.5rem; text-align: center;" inputmode="numeric"
-                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        onkeydown="if(event.key === 'Enter') { event.preventDefault(); searchEmployee(); }">
 
                     <button type="button" class="btn-next" style="width: 100%; margin-top: 1.5rem;"
                         onclick="searchEmployee()">Buscar / Iniciar &rarr;</button>
@@ -450,6 +422,10 @@
                         <option value="Brigadistas">Brigadistas</option>
 
                         <option value="Nuevo ingreso">Nuevo ingreso</option>
+
+                        <option value="Ley Silla">Ley Silla</option>
+<option value="Consulta general">Consulta general</option>
+<option value="Consulta Nutricional">Consulta Nutricional</option>
 
                     </select>
 
@@ -824,14 +800,13 @@
                         </select>
                     </div>
 
-                    <div class="form-group full-width">
-
+                    <div class="form-group full-width" data-section="funciones_puesto">
                         <label for="funcionesPuesto">Funciones principales de Puesto</label>
-
                         <textarea id="funcionesPuesto" name="funcionesPuesto" rows="2"
                             placeholder="Describa las funciones principales..."></textarea>
-
                     </div>
+
+
 
                 </div>
 
@@ -856,175 +831,102 @@
 
 
                 <!-- Sección de Padecimientos movida aquí -->
-
-                <div class="form-group full-width" style="margin-bottom: 1.5rem;">
-
-                    <label for="padecimientoSelect">Padecimiento / Condición</label>
-
-                    <select id="padecimientoSelect" onchange="checkPadecimientoOtros(this)">
-
-                        <option value="" selected>Ninguno / Sano</option>
-
-                        <option value="Diabetes Mellitus I">Diabetes Mellitus I</option>
-
-                        <option value="Diabetes Mellitus II">Diabetes Mellitus II</option>
-
-                        <option value="Hipertension">Hipertension</option>
-
-                        <option value="Asma">Asma</option>
-
-                        <option value="IMC">IMC (Obesidad/Sobrepeso)</option>
-
-                        <option value="Hipertension + Diabetes Mellitus I">Hipertension + Diabetes Mellitus I
-
-                        </option>
-
-                        <option value="Hipertension + Diabetes Mellitus II">Hipertension + Diabetes Mellitus II
-
-                        </option>
-
-                        <option value="IMC + Hipertension">IMC + Hipertension</option>
-
-                        <option value="IMC + Diabetes Meliitus I">IMC + Diabetes Meliitus I</option>
-
-                        <option value="IMC + Diabetes Mellitus II">IMC + Diabetes Mellitus II</option>
-
-                        <option value="Otros">Otros (Especificar)</option>
-
-                    </select>
-
-                    <!-- Input oculto para "Otros" o para guardar el valor final -->
-
-                    <input type="text" id="padecimiento" name="padecimiento" placeholder="Especifique el padecimiento"
-                        style="display: none; margin-top: 0.5rem;">
-
-
-                </div>
-
-                <div class="form-group full-width" style="margin-top: 1rem;">
-                    <label for="antecedentes">Antecedentes</label>
-                    <textarea id="antecedentes" name="antecedentes" rows="3" placeholder="Especifique antecedentes..."
-                        style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
-                </div>
-
-
-
-                <div class="grid-3">
-
-                    <div class="form-group">
-
-                        <label for="peso">Peso (kg)</label>
-
-                        <input type="number" step="0.1" id="peso" name="peso" oninput="calcularIMC()" required>
-
+                <div data-section="padecimientos">
+                    <div class="form-group full-width" style="margin-bottom: 1.5rem;">
+                        <label for="padecimientoSelect">Padecimiento / Condición</label>
+                        <select id="padecimientoSelect" onchange="checkPadecimientoOtros(this)">
+                            <option value="" selected>Ninguno / Sano</option>
+                            <option value="Diabetes Mellitus I">Diabetes Mellitus I</option>
+                            <option value="Diabetes Mellitus II">Diabetes Mellitus II</option>
+                            <option value="Hipertension">Hipertension</option>
+                            <option value="Asma">Asma</option>
+                            <option value="IMC">IMC (Obesidad/Sobrepeso)</option>
+                            <option value="Hipertension + Diabetes Mellitus I">Hipertension + Diabetes Mellitus I
+                            </option>
+                            <option value="Hipertension + Diabetes Mellitus II">Hipertension + Diabetes Mellitus II
+                            </option>
+                            <option value="IMC + Hipertension">IMC + Hipertension</option>
+                            <option value="IMC + Diabetes Meliitus I">IMC + Diabetes Meliitus I</option>
+                            <option value="IMC + Diabetes Mellitus II">IMC + Diabetes Mellitus II</option>
+                            <option value="Otros">Otros (Especificar)</option>
+                        </select>
+                        <!-- Input oculto para "Otros" o para guardar el valor final -->
+                        <input type="text" id="padecimiento" name="padecimiento" placeholder="Especifique el padecimiento"
+                            style="display: none; margin-top: 0.5rem;">
                     </div>
 
+                    <div class="form-group full-width" style="margin-top: 1rem;">
+                        <label for="antecedentes">Antecedentes</label>
+                        <textarea id="antecedentes" name="antecedentes" rows="3" placeholder="Especifique antecedentes..."
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+                    </div>
+                </div>
+
+                <div class="grid-3" data-section="antropometria">
                     <div class="form-group">
-
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" step="0.1" id="peso" name="peso" oninput="calcularIMC()" required>
+                    </div>
+                    <div class="form-group">
                         <label for="talla">Talla (cm)</label>
-
                         <input type="number" step="1" id="talla" name="talla" placeholder="Ej: 175"
                             oninput="calcularIMC()" required>
-
                     </div>
-
                     <div class="form-group">
-
-                        <label for="taSistolica">TA Sistólica</label>
-
-                        <input type="number" id="taSistolica" name="taSistolica" placeholder="Ej: 120" required>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="taDiastolica">TA Diastólica</label>
-
-                        <input type="number" id="taDiastolica" name="taDiastolica" placeholder="Ej: 80" required>
-
-                    </div>
-
-                    <div class="form-group">
-
                         <label for="imc">IMC</label>
-
                         <input type="number" step="0.1" id="imc" name="imc" readonly style="background-color: #f1f5f9;"
                             required>
-
                     </div>
-
                     <div class="form-group">
-
-                        <label for="pulso">Pulso (bpm)</label>
-
-                        <input type="number" id="pulso" name="pulso" required>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="oximetria">Oximetría (%)</label>
-
-                        <input type="number" id="oximetria" name="oximetria" placeholder="Ej: 98" required>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="glucometria">Glucometría (mg/dL)</label>
-
-                        <input type="number" id="glucometria" name="glucometria" placeholder="Ej: 90" required>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="temperatura">Temperatura (°C)</label>
-
-                        <input type="number" step="0.1" id="temperatura" name="temperatura" placeholder="Ej: 36.5">
-
-                    </div>
-
-                    <div class="form-group">
-
                         <label for="fat">% FAT</label>
-
                         <input type="number" step="0.1" id="fat" name="fat">
-
                     </div>
-
                     <div class="form-group">
-
                         <label for="musc">% MUSC</label>
-
                         <input type="number" step="0.1" id="musc" name="musc">
-
                     </div>
-
                     <div class="form-group">
-
                         <label for="rmi">RMI (Kcal)</label>
-
                         <input type="number" id="rmi" name="rmi">
-
                     </div>
-
                     <div class="form-group">
-
                         <label for="bodyage">Body Age</label>
-
                         <input type="number" id="bodyage" name="bodyage">
-
                     </div>
-
                     <div class="form-group">
-
                         <label for="visc">Grasa Visceral</label>
-
                         <input type="number" step="0.5" id="visc" name="visc">
-
                     </div>
+                </div>
 
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label for="taSistolica">TA Sistólica</label>
+                        <input type="number" id="taSistolica" name="taSistolica" placeholder="Ej: 120" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taDiastolica">TA Diastólica</label>
+                        <input type="number" id="taDiastolica" name="taDiastolica" placeholder="Ej: 80" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pulso">Pulso (bpm)</label>
+                        <input type="number" id="pulso" name="pulso" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="oximetria">Oximetría (%)</label>
+                        <input type="number" id="oximetria" name="oximetria" placeholder="Ej: 98" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperatura">Temperatura (°C)</label>
+                        <input type="number" step="0.1" id="temperatura" name="temperatura" placeholder="Ej: 36.5">
+                    </div>
+                </div>
+
+                <div class="grid-3" data-section="otros_signos">
+                    <div class="form-group">
+                        <label for="glucometria">Glucometría (mg/dL)</label>
+                        <input type="number" id="glucometria" name="glucometria" placeholder="Ej: 90" required>
+                    </div>
                     <div class="form-group">
                         <label for="agudezaVisual">Agudeza Visual</label>
                         <input type="text" id="agudezaVisual" name="agudezaVisual" placeholder="Ej: 20/20">
@@ -1040,7 +942,7 @@
                 <!-- ============================================== -->
                 <!-- SECCION REUBICADA: Antecedentes Ginecológicos (Final de Paso 4) -->
                 <!-- ============================================== -->
-                <div id="antecedentesGinecoContainer" class="form-group full-width"
+                <div id="antecedentesGinecoContainer" class="form-group full-width" data-section="gineco"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem; display: none;">
                     <label>Antecedentes Ginecológicos <span
                             style="font-size: 0.9rem; font-weight: normal; color: #64748b;">(Solo
@@ -1120,7 +1022,137 @@
 
                 <div class="section-title">Historia Ocupacional - Antecedentes Patologicos personales</div>
 
+                <!-- SECCIÓN: Descripción específica del cargo -->
+                <div class="form-group full-width" data-section="descripcion_cargo"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                    
+                    <div class="section-title" style="margin-bottom: 1.5rem;">Descripción específica del cargo</div>
+                    <div id="historial_ocupacional_container">
+                        <!-- Puesto 1 -->
+                        <div id="job_block_1" class="job-block" style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 1rem; background-color: #f8fafc;">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem; color: #475569;">Puesto de Trabajo 1</div>
+                            <div class="grid-3">
+                                <div class="form-group">
+                                    <label for="historial_empresa_1">Empresa</label>
+                                    <input type="text" id="historial_empresa_1" name="historial_empresa_1" placeholder="Empresa anterior...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="historial_ocupacion_1">Ocupación</label>
+                                    <input type="text" id="historial_ocupacion_1" name="historial_ocupacion_1" placeholder="Puesto desempeñado...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="historial_tiempo_1">Tiempo laborado</label>
+                                    <input type="text" id="historial_tiempo_1" name="historial_tiempo_1" placeholder="Ej: 2 años...">
+                                </div>
+                            </div>
+                            <div class="form-group full-width" style="margin-top: 1rem;">
+                                <label>Exposición a Factores de Riesgo</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <select id="exposicion_select_1" style="flex: 1;" onchange="addExposureRisk(1)">
+                                        <option value="">Seleccione factor de riesgo...</option>
+                                        <option value="Químicos">Químicos</option>
+                                        <option value="Físicos">Físicos</option>
+                                        <option value="Carga Física">Carga Física</option>
+                                        <option value="Ergonómicos">Ergonómicos</option>
+                                        <option value="EPP">EPP</option>
+                                    </select>
+                                </div>
+                                <div id="exposureList_1" style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                            </div>
+                        </div>
 
+                        <!-- Puesto 2 (Oculto) -->
+                        <div id="job_block_2" class="job-block" style="display: none; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 1rem; background-color: #f8fafc;">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem; color: #475569;">Puesto de Trabajo 2</div>
+                            <div class="grid-3">
+                                <div class="form-group">
+                                    <label for="historial_empresa_2">Empresa</label>
+                                    <input type="text" id="historial_empresa_2" name="historial_empresa_2" placeholder="Empresa anterior...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="historial_ocupacion_2">Ocupación</label>
+                                    <input type="text" id="historial_ocupacion_2" name="historial_ocupacion_2" placeholder="Puesto desempeñado...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="historial_tiempo_2">Tiempo laborado</label>
+                                    <input type="text" id="historial_tiempo_2" name="historial_tiempo_2" placeholder="Ej: 2 años...">
+                                </div>
+                            </div>
+                            <div class="form-group full-width" style="margin-top: 1rem;">
+                                <label>Exposición a Factores de Riesgo</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <select id="exposicion_select_2" style="flex: 1;" onchange="addExposureRisk(2)">
+                                        <option value="">Seleccione factor de riesgo...</option>
+                                        <option value="Químicos">Químicos</option>
+                                        <option value="Físicos">Físicos</option>
+                                        <option value="Carga Física">Carga Física</option>
+                                        <option value="Ergonómicos">Ergonómicos</option>
+                                        <option value="EPP">EPP</option>
+                                    </select>
+                                </div>
+                                <div id="exposureList_2" style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Puesto 3 (Oculto) -->
+                        <div id="job_block_3" class="job-block" style="display: none; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 1rem; background-color: #f8fafc;">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem; color: #475569;">Puesto de Trabajo 3</div>
+                            <div class="grid-3">
+                                <div class="form-group">
+                                    <label for="historial_empresa_3">Empresa</label>
+                                    <input type="text" id="historial_empresa_3" name="historial_empresa_3" placeholder="Empresa anterior...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="historial_ocupacion_3">Ocupación</label>
+                                    <input type="text" id="historial_ocupacion_3" name="historial_ocupacion_3" placeholder="Puesto desempeñado...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="historial_tiempo_3">Tiempo laborado</label>
+                                    <input type="text" id="historial_tiempo_3" name="historial_tiempo_3" placeholder="Ej: 2 años...">
+                                </div>
+                            </div>
+                            <div class="form-group full-width" style="margin-top: 1rem;">
+                                <label>Exposición a Factores de Riesgo</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <select id="exposicion_select_3" style="flex: 1;" onchange="addExposureRisk(3)">
+                                        <option value="">Seleccione factor de riesgo...</option>
+                                        <option value="Químicos">Químicos</option>
+                                        <option value="Físicos">Físicos</option>
+                                        <option value="Carga Física">Carga Física</option>
+                                        <option value="Ergonómicos">Ergonómicos</option>
+                                        <option value="EPP">EPP</option>
+                                    </select>
+                                </div>
+                                <div id="exposureList_3" style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <button type="button" id="btnAddJob" onclick="addJobBlock()" style="background-color: #0d9488; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: background-color 0.2s;">
+                            <span style="font-size: 1.25rem;">+</span> Agregar otro puesto anterior
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- SECCIÓN: EPP (Equipo de Protección Personal) -->
+                <div class="form-group full-width" data-section="descripcion_cargo"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+
+                    <div class="section-title" style="margin-bottom: 1rem;">Equipo de Protección Personal (EPP)</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+                        <select id="epp_select" style="flex: 1;" onchange="addEPPItem()">
+                            <option value="">Seleccione EPP...</option>
+                            <option value="Botas">Botas</option>
+                            <option value="Cascos">Cascos</option>
+                            <option value="Lentes">Lentes</option>
+                            <option value="Tapones de oído">Tapones de oído</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div id="eppList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                </div>
 
                 <div class="form-group full-width"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
@@ -1160,7 +1192,7 @@
                 </div>
 
                 <!-- SECCIÓN: Antecedentes Heredofamiliares (AHF) -->
-                <div class="form-group full-width"
+                <div class="form-group full-width" data-section="ahf"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
                     <label>Antecedentes Heredofamiliares (AHF)</label>
                     <div class="risk-grid">
@@ -1190,7 +1222,7 @@
                 </div>
 
                 <!-- SECCIÓN: Vacunas y Alergias -->
-                <div class="grid-2" style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
+                <div class="grid-2" data-section="vacunas" style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
                     <div class="form-group">
                         <label>Esquema de Vacunación</label>
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
@@ -1213,7 +1245,7 @@
                     </div>
                 </div>
 
-                <div class="form-group full-width"
+                <div class="form-group full-width" data-section="patologias"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
 
                     <label>Patologías / Antecedentes</label>
@@ -1286,7 +1318,7 @@
 
                 <!-- SECCIÃ“N NUEVA: Riesgos Laborales (Tabs) -->
 
-                <div class="form-group full-width"
+                <div class="form-group full-width" data-section="riesgos"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
 
                     <label style="margin-bottom: 0.5rem; display: block;">Estudios de Gabinete / Riesgos
@@ -1457,7 +1489,7 @@
                 <!-- ============================================== -->
                 <!-- NUEVA SECCION: Actividades Adicionales -->
                 <!-- ============================================== -->
-                <div class="form-group full-width"
+                <div class="form-group full-width" data-section="actividades_adicionales"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
                     <label>Actividades Adicionales</label>
                     <div class="form-group">
@@ -1472,9 +1504,71 @@
                 </div>
 
                 <!-- ============================================== -->
+                <!-- SECCION: Ley Silla (Insuficiencia Venosa) -->
+                <!-- ============================================== -->
+                <div class="form-group full-width" data-section="ley_silla"
+                    style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem; display: none;">
+                    <div class="section-title" style="margin-bottom: 1rem; color: #6b21a8; font-size: 1.2rem;">Evaluación de Ley Silla (Insuficiencia Venosa)</div>
+                    
+                    <div style="background: rgba(107, 33, 168, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(107, 33, 168, 0.15); display: flex; flex-direction: column; gap: 1.5rem;">
+                        
+                        <!-- Interrogatorio -->
+                        <div>
+                            <span style="font-weight: 600; display: block; margin-bottom: 0.75rem; color: #581c87; font-size: 0.95rem;">
+                                📋 Síntomas en Miembros Inferiores (Interrogatorio)
+                            </span>
+                            <div class="risk-grid">
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_int" id="leysilla_int_dolor" value="Dolor en piernas">
+                                    <span>Dolor en piernas</span>
+                                </label>
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_int" id="leysilla_int_edema" value="Edema de piernas">
+                                    <span>Edema (hinchazón) de piernas</span>
+                                </label>
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_int" id="leysilla_int_calambres" value="Calambres en piernas">
+                                    <span>Calambres en piernas</span>
+                                </label>
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_int" id="leysilla_int_cansancio" value="Cansancio de piernas">
+                                    <span>Cansancio de piernas</span>
+                                </label>
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_int" id="leysilla_int_pesadez" value="Pesadez en piernas">
+                                    <span>Pesadez en piernas</span>
+                                </label>
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_int" id="leysilla_int_varices" value="Venas varicosas">
+                                    <span>Presencia de venas varicosas</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Exploración Física -->
+                        <div style="border-top: 1px solid rgba(107, 33, 168, 0.1); padding-top: 1.25rem;">
+                            <span style="font-weight: 600; display: block; margin-bottom: 0.75rem; color: #581c87; font-size: 0.95rem;">
+                                🔍 Hallazgos en Miembros Inferiores (Exploración Física)
+                            </span>
+                            <div class="risk-grid">
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_exp" id="leysilla_exp_edema" value="Edema">
+                                    <span>Edema</span>
+                                </label>
+                                <label class="risk-card">
+                                    <input type="checkbox" name="leysilla_exp" id="leysilla_exp_varices" value="Venas varicosas">
+                                    <span>Presencia de venas varicosas</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ============================================== -->
                 <!-- NUEVA SECCION: Evaluación Médica -->
                 <!-- ============================================== -->
-                <div class="form-group full-width"
+                <div class="form-group full-width" data-section="evaluacion_integral"
                     style="margin-top: 2rem; border-top: 2px dashed #cbd5e1; padding-top: 1.5rem;">
                     <label>Evaluación Médica Integral</label>
 
@@ -2438,8 +2532,10 @@
                     <img src="/assets/branding/EHS.png" class="pdf-logo" alt="Logo">
                 </div>
                 <div style="text-align: right;">
-                    <p class="pdf-label">Fecha de Generación</p>
-                    <p id="pdf_fechaGen" style="margin:0; font-size: 11px; font-weight:700;">--</p>
+                    <p class="pdf-label" style="font-size:7px; margin-bottom:2px;">Fecha de inicio de historial</p>
+                    <p id="pdf_fechaGen" style="margin:0; font-size:9px; font-weight:700;">--</p>
+                    <p class="pdf-label" style="font-size:7px; margin-top:6px; margin-bottom:2px;">Fecha actual</p>
+                    <p id="pdf_fechaActual" style="margin:0; font-size:9px; font-weight:700;">--</p>
                     <p class="pdf-label" style="margin-top:5px;">Servicio Médico EHS</p>
                 </div>
             </div>
@@ -2669,6 +2765,21 @@
                 </div>
             </div>
 
+            <!-- LEY SILLA (Solo si aplica) -->
+            <div id="pdf_leysilla_section" class="pdf-section" style="display:none;">
+                <div class="pdf-section-title">Evaluación de Ley Silla (Insuficiencia Venosa)</div>
+                <div style="font-size: 10px; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #fcf6ff;">
+                    <div>
+                        <strong style="color: #6b21a8;">Síntomas (Interrogatorio):</strong>
+                        <span id="pdf_leysilla_sintomas" class="pdf-value">--</span>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong style="color: #6b21a8;">Exploración Física:</strong>
+                        <span id="pdf_leysilla_exploracion" class="pdf-value">--</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- GINECO (Solo si aplica) -->
             <div id="pdf_gineco_section" class="pdf-section" style="display:none;">
                 <div class="pdf-section-title">7. Antecedentes Ginecológicos</div>
@@ -2720,22 +2831,7 @@
                 </div>
             </div>
 
-            <!-- FIRMAS -->
-            <div style="margin-top:50px; display:grid; grid-template-columns: 1fr 100px 1fr; gap: 20px;">
-                <div style="text-align:center;">
-                    <div style="border-top:1px solid #1e293b; margin-top:30px; padding-top:5px;">
-                        <p style="font-size:10px; font-weight:700; margin:0;">Firma del Médico / Enfermería</p>
-                        <p style="font-size:8px; color:#64748b; margin:0;">Cédula Profesional</p>
-                    </div>
-                </div>
-                <div></div>
-                <div style="text-align:center;">
-                    <div style="border-top:1px solid #1e293b; margin-top:30px; padding-top:5px;">
-                        <p style="font-size:10px; font-weight:700; margin:0;">Firma del Colaborador</p>
-                        <p style="font-size:8px; color:#64748b; margin:0;">Consentimiento Informado</p>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 
@@ -2869,11 +2965,12 @@
     <script src="/src/client/js/config.js?v=4.4"></script>
     <script src="/src/client/js/data.js?v=4.4"></script>
     <script src="/src/client/js/auth.js?v=4.4"></script>
-    <script src="/src/client/js/pdf.js?v=4.4"></script>
+    <script src="/src/client/js/pdf.js?v=4.7"></script>
     <script src="/src/client/js/dashboard.js?v=4.4"></script>
     <script src="/src/client/js/ai.js?v=4.4"></script>
     <script src="/src/client/js/export.js?v=4.4"></script>
-    <script src="/src/client/js/app.js?v=4.4"></script>
+    <script src="/src/client/js/app.js?v=4.7"></script>
+<script src="/src/client/js/nutrition.js?v=1"></script>
 
     <!-- PDF SELECTION MODAL FOR EXPORT -->
     <div id="pdfSelectionModal" class="modal-overlay" style="display: none; z-index: 10001;"
@@ -2964,6 +3061,52 @@
                 <button type="button" onclick="generatePDFReport()" class="btn-next"
                     style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">Generar
                     PDF</button>
+            </div>
+        </div>
+    </div>
+    <!-- REPORT FORMAT SELECTION MODAL -->
+    <div id="reportFormatModal" class="modal-overlay" style="display: none; z-index: 10002;"
+        onclick="if(event.target === this) closeReportFormatModal()">
+        <div class="modal-content"
+            style="max-width: 450px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+            <div style="padding: 1.5rem; background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                <h3 id="reportFormatTitle" style="margin: 0; font-size: 1.25rem;">📋 Generar Reporte</h3>
+                <p id="reportFormatSubtitle" style="margin: 0.5rem 0 0; opacity: 0.9; font-size: 0.85rem;">Selecciona el formato de exportación</p>
+            </div>
+            <div style="padding: 1.5rem;">
+                <!-- Data Quality Preview -->
+                <div id="reportDataQuality" style="background: #f8fafc; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.1rem;">📊</span>
+                        <strong style="color: #1e293b; font-size: 0.9rem;">Vista previa de datos</strong>
+                    </div>
+                    <div id="reportQualityContent" style="font-size: 0.85rem; color: #475569; line-height: 1.6;">
+                        Cargando...
+                    </div>
+                </div>
+                <!-- Format Options -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button type="button" onclick="executePredefinedReport('pdf')"
+                        style="padding: 1.5rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px; background: white; cursor: pointer; text-align: center; transition: all 0.2s;"
+                        onmouseover="this.style.borderColor='#ef4444'; this.style.background='#fef2f2'"
+                        onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='white'">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+                        <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">PDF</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Con gráficas e<br>interpretaciones</div>
+                    </button>
+                    <button type="button" onclick="executePredefinedReport('excel')"
+                        style="padding: 1.5rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px; background: white; cursor: pointer; text-align: center; transition: all 0.2s;"
+                        onmouseover="this.style.borderColor='#10b981'; this.style.background='#f0fdf4'"
+                        onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='white'">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                        <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Excel</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Datos tabulares<br>con nivel de riesgo</div>
+                    </button>
+                </div>
+            </div>
+            <div style="padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e5e7eb; text-align: right;">
+                <button type="button" onclick="closeReportFormatModal()" class="btn-prev"
+                    style="padding: 0.6rem 1.5rem;">Cancelar</button>
             </div>
         </div>
     </div>
